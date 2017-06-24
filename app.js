@@ -13,19 +13,21 @@ const db = knex({
     }
 });
 
+//probably need a .then() call after below to get it to execute the promise
 // db.schema.createTableIfNotExists('articles', table => {
 //     table.increments('id').primary();
 //     table.string('title');
 // });
-db('articles').insert([
-    { title: 'Winds of Winter' }
-]).then(result => {
-    console.log(result);
-});
 
-db('articles').select('title').first().then(t => {
-    console.log(t.title);
-});
+// db('articles').insert([
+//     { title: 'Winds of Winter' }
+// ]).then(result => {
+//     console.log(result);
+// });
+
+// db('articles').select('title').first().then(t => {
+//     console.log(t.title);
+// });
 
 // fs.createReadStream('transactions-export-2017.csv')
 //     .pipe(csv())
