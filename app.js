@@ -13,11 +13,17 @@ const db = knex({
     }
 });
 
+var transactionTable = 'transactions2';
+
 //probably need a .then() call after below to get it to execute the promise
-// db.schema.createTableIfNotExists('articles', table => {
-//     table.increments('id').primary();
-//     table.string('title');
-// });
+db.schema.createTableIfNotExists(transactionTable, table => {
+    table.increments('id').primary();
+    table.string('description');
+    table.string('amount');
+    table.date('transactiondate');
+}).then(result => {
+    console.log(result);
+});
 
 // db('articles').insert([
 //     { title: 'Winds of Winter' }
@@ -29,12 +35,28 @@ const db = knex({
 //     console.log(t.title);
 // });
 
-// fs.createReadStream('transactions-export-2017.csv')
-//     .pipe(csv())
-//     .on('data', function (data) {
-//         //console.log(data);
-//         var description = data.Description === 'Check'
-//             ? data.Description + ' ' + data.No : data.Description;
-//         var amount = data.Debit === '' ? data.Credit : data.Debit;
-//         console.log('Date: %s; Description: %s; Amount: %s', data.Date, description, amount);
-//     });
+fs.createReadStream('transactions-export-2017.csv')
+    .pipe(csv())
+    .on('data', function (data) {
+        var description = data.Description === 'Check'
+            ? data.Description + ' ' + data.No : data.Description;
+        var amount = data.Debit === '' ? data.Credit : data.Debit;
+
+        db(transactionTable).where({
+            description: description,
+            amount: amount,
+            transactiondate: data.Date
+        }).select().first().then(t => {
+            if(!t) {
+                db(transactionTable).insert([
+                    {
+                        description: description,
+                        amount: amount,
+                        transactiondate: data.Date
+                    }
+                ]).then(result => {
+                    console.log('inserted');
+                });
+            }
+        });
+    });
