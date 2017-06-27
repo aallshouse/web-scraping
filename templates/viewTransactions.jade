@@ -1,0 +1,23 @@
+doctype html
+html(lang="en")
+    head
+        title= pageTitle
+        link(rel='stylesheet', href='/css/bootstrap.min.css')
+        link(rel='stylesheet', href='/css/bootstrap-theme.min.css')
+    body
+        h3.col-md-4 Last 10 transactions
+        table.table.table-striped
+            thead
+                tr
+                    th Description
+                    th Amount
+                    th Date
+            tbody
+                each trans in transactions
+                    tr
+                        td= trans.description
+                        td= trans.amount
+                        td= trans.transactiondate
+
+        script(src='/js/jquery.min.js')
+        script(src='/js/bootstrap.min.js')

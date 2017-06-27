@@ -40,6 +40,20 @@ var dataIsValid = function(data) {
     return true;
 };
 
+var getTransactions = function(data) {
+    var page = data.page || 0;
+    if(page > 0) {
+        page = page - 1;
+    }
+    
+    var count = data.count || 10;
+    return transactionPromise = db('transactions')
+        .orderBy('transactiondate', 'desc')
+        .orderBy('id', 'desc')
+        .select(knex.raw("description, amount, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
+        .limit(count).offset(page*count);
+};
+
 var insertTransaction = function(data) {
     if(!dataIsValid(data)) {
         console.log('error reading data for insert');
@@ -51,7 +65,7 @@ var insertTransaction = function(data) {
         amount: data.amount,
         transactiondate: data.date
     }).select().first().then(t => {
-        if(!t) {
+        if(!t || data.allowDuplicate === 1) {
             db('transactions').insert([
                 {
                     description: data.description,
@@ -65,7 +79,27 @@ var insertTransaction = function(data) {
     });
 };
 
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+//app.set('view engine', 'jade');
+
+app.use(
+    '/css/bootstrap.min.css',
+    express.static('bower_components/bootstrap/dist/css/bootstrap.min.css')
+);
+app.use(
+    '/css/bootstrap-theme.min.css',
+    express.static('bower_components/bootstrap/dist/css/bootstrap-theme.min.css')
+);
+app.use(
+    '/js/bootstrap.min.js',
+    express.static('bower_components/bootstrap/dist/js/bootstrap.min.js')
+);
+app.use(
+    '/js/jquery.min.js',
+    express.static('bower_components/jquery/dist/jquery.min.js')
+);
 
 app.get('/', (req, res, next) => {
     var html = jade.renderFile('./templates/index.jade', {
@@ -82,12 +116,36 @@ app.post('/articles', (req, res) => {
     res.send('OK');
 });
 
+app.get('/transactions/view', (req, res) => {
+    var transactionPromise = getTransactions({
+        count: req.query.count,
+        page: req.query.page
+    });
+
+    //resolve promise and return data with html
+    transactionPromise.then(result => {
+        var html = jade.renderFile('./templates/viewTransactions.jade', {
+            pageTitle: 'View Transactions',
+            transactions: result
+        });
+        res.send(html);
+    });
+});
+
+app.get('/transactions', (req, res) => {
+    var html = jade.renderFile('./templates/editTransaction.jade', {
+        pageTitle: 'Edit Transaction'
+    });
+    res.send(html);
+});
+
 app.post('/transactions', (req, res) => {
     console.log(req.body.date);
     insertTransaction({
         description: req.body.description,
         amount: req.body.amount,
-        transactiondate: req.body.date
+        date: req.body.date,
+        allowDuplicate: req.body.allowDuplicate || 0
     });
 
     res.send('OK');

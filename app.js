@@ -13,7 +13,7 @@ const db = knex({
     }
 });
 
-var transactionTable = 'transactions2';
+var transactionTable = 'transactions';
 
 //probably need a .then() call after below to get it to execute the promise
 db.schema.createTableIfNotExists(transactionTable, table => {
