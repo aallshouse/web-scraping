@@ -41,7 +41,7 @@ var dataIsValid = function(data) {
 };
 
 var getTransactions = function(data) {
-    var page = data.page || 0;
+    var page = data.page;
     if(page > 0) {
         page = page - 1;
     }
@@ -50,7 +50,7 @@ var getTransactions = function(data) {
     return transactionPromise = db('transactions')
         .orderBy('transactiondate', 'desc')
         .orderBy('id', 'desc')
-        .select(knex.raw("description, amount, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
+        .select(knex.raw("id, description, amount, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
         .limit(count).offset(page*count);
 };
 
@@ -73,10 +73,30 @@ var insertTransaction = function(data) {
                     transactiondate: data.date
                 }
             ]).then(result => {
-                console.log('inserted');
+                console.log('transaction inserted');
             });
         }
     });
+};
+
+var updateTransaction = function(data) {
+    if(!dataIsValid(data)) {
+        console.log('error reading data for update');
+        return;
+    }
+    if(!data.id) {
+        console.log('error reading data.id for update');
+        return;
+    }
+
+    db('transactions').where({ id: data.id })
+        .update({
+            description: data.description,
+            amount: data.amount,
+            transactiondate: data.date
+        }).then(result => {
+            console.log('transaction updated');
+        });
 };
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -117,16 +137,18 @@ app.post('/articles', (req, res) => {
 });
 
 app.get('/transactions/view', (req, res) => {
+    var page  = req.query.page || 0;
     var transactionPromise = getTransactions({
         count: req.query.count,
-        page: req.query.page
+        page: page
     });
 
     //resolve promise and return data with html
     transactionPromise.then(result => {
         var html = jade.renderFile('./templates/viewTransactions.jade', {
             pageTitle: 'View Transactions',
-            transactions: result
+            transactions: result,
+            page: page
         });
         res.send(html);
     });
@@ -140,16 +162,52 @@ app.get('/transactions', (req, res) => {
 });
 
 app.post('/transactions', (req, res) => {
-    console.log(req.body.date);
-    insertTransaction({
-        description: req.body.description,
-        amount: req.body.amount,
-        date: req.body.date,
-        allowDuplicate: req.body.allowDuplicate || 0
-    });
+    if(req.body.id) {
+        updateTransaction({
+            description: req.body.description,
+            amount: req.body.amount,
+            date: req.body.date,
+            id: req.body.id
+        });
+    } else {
+        insertTransaction({
+            description: req.body.description,
+            amount: req.body.amount,
+            date: req.body.date,
+            allowDuplicate: req.body.allowDuplicate || 0
+        });
+    }
 
-    res.send('OK');
+    //res.send('OK');
+    //TODO: redirect needs to send the updated data
+    var page = req.body.page || 1;
+    res.redirect('/transactions/view?page=' + page);
 });
+
+app.post('/transactions/delete', (req, res) => {
+    console.log('delete transaction id ' + req.body.id);
+    res.end();
+});
+
+app.get('/transactions/:id', (req, res) => {
+    var transactionPromise = getTransaction(req.params.id);
+    var page = req.query.page || 1;
+    transactionPromise.then(result => {
+        var html = jade.renderFile('./templates/editTransaction.jade', {
+            pageTitle: 'Update Transaction',
+            transaction: result,
+            page: page
+        });
+        res.send(html);
+    })
+});
+
+var getTransaction = function(id) {
+    return transactionPromise = db('transactions')
+        .where({ id: id })
+        .select(knex.raw("id, description, amount, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
+        .first();
+};
 
 app.put('/transactions/:id', (req, res) => {
     console.log('Param id: ' + req.params.id);
