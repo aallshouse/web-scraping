@@ -15,17 +15,21 @@ html(lang="en")
                             form(action='/transactions', method='POST')
                                 .form-group
                                     label Transaction Id
-                                    input.form-control(type='text', name='id', value="#{transaction ? transaction.id : ''}")
+                                    .input-group
+                                        input.form-control(type='text', name='id', value="#{transaction ? transaction.id : ''}")
+                                        span.input-group-btn
+                                            btn.btn.btn-info Find
                                 .form-group
                                     label Description
-                                    input.form-control(type='text', name='description', value="#{transaction ? transaction.description : ''}")
+                                    input#transactionDescription.form-control(type='text', name='description', value="#{transaction ? transaction.description : ''}")
                                 .form-group
                                     label Amount
-                                    input.form-control(type='text', name='amount', value="#{transaction ? transaction.amount : ''}")
+                                    input#transactionAmount.form-control(type='text', name='amount', value="#{transaction ? transaction.amount : ''}")
                                 .form-group
                                     label Date
-                                    input.form-control(type='text', name='date', value="#{transaction ? transaction.transactiondate : ''}")
+                                    input#transactionDate.form-control(type='text', name='date', value="#{transaction ? transaction.transactiondate : ''}")
                                 input(type='hidden', name='page', value="#{page}")
                                 button(type='submit', class='btn btn-lg btn-success') Submit
         script(src='/js/jquery.min.js')
         script(src='/js/bootstrap.min.js')
+        script(src='/js/findTransaction.js')

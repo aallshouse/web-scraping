@@ -23,9 +23,7 @@ html(lang="en")
                         td= trans.amount
                         td= trans.transactiondate
                         td
-                            form(action='/transactions/delete', method='POST')
-                                input(type='hidden', name='id', value="#{trans.id}")
-                                button.btn.btn-danger.btn-sm(type='submit') Delete
+                            button.btn.btn-danger.btn-sm(data-id='#{trans.id}') Delete
         - var nextPage = currentPage + 1;
         - var prevPage = currentPage - 1;
         - prevPage = prevPage < 0 ? 1 : prevPage;
@@ -34,3 +32,4 @@ html(lang="en")
         a(href='/transactions?page=#{currentPage}') Add Transaction
         script(src='/js/jquery.min.js')
         script(src='/js/bootstrap.min.js')
+        script(src='/js/deleteTransaction.js')

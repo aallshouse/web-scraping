@@ -99,6 +99,18 @@ var updateTransaction = function(data) {
         });
 };
 
+var deleteTransaction = function(id) {
+    if(!id) {
+        console.log('error reading id for delete');
+        return;
+    }
+
+    db('transactions').where({ id: id }).del()
+        .then(result => {
+            console.log('transaction deleted');
+        });
+};
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -119,6 +131,14 @@ app.use(
 app.use(
     '/js/jquery.min.js',
     express.static('bower_components/jquery/dist/jquery.min.js')
+);
+app.use(
+    '/js/deleteTransaction.js',
+    express.static('js/deleteTransaction.js')
+);
+app.use(
+    '/js/findTransaction.js',
+    express.static('js/findTransaction.js')
 );
 
 app.get('/', (req, res, next) => {
@@ -184,8 +204,9 @@ app.post('/transactions', (req, res) => {
     res.redirect('/transactions/view?page=' + page);
 });
 
-app.post('/transactions/delete', (req, res) => {
-    console.log('delete transaction id ' + req.body.id);
+app.delete('/transactions/:id', (req, res) => {
+    console.log('delete transaction id ' + req.params.id);
+    //deleteTransaction(req.params.id);
     res.end();
 });
 
@@ -199,6 +220,14 @@ app.get('/transactions/:id', (req, res) => {
             page: page
         });
         res.send(html);
+    })
+});
+
+app.get('/transactions/find/:id', (req, res) => {
+    console.log(req.params.id);
+    var transactionPromise = getTransaction(req.params.id);
+    transactionPromise.then(result => {
+        res.send(result);
     })
 });
 
