@@ -163,16 +163,34 @@ app.get('/transactions/view', (req, res) => {
         page: page
     });
 
-    //resolve promise and return data with html
-    transactionPromise.then(result => {
-        var html = jade.renderFile('./templates/viewTransactions.jade', {
-            pageTitle: 'View Transactions',
-            transactions: result,
-            page: page
-        });
-        res.send(html);
+    var bankBalancePromise = getBankBalance();
+    var availableBalancePromise = getAvailableBalance();
+
+    //resolve promises and return data with html
+    Promise.all([transactionPromise, bankBalancePromise, availableBalancePromise])
+        .then(result => {
+            var html = jade.renderFile('./templates/viewTransactions.jade', {
+                pageTitle: 'View Transactions',
+                transactions: result[0],
+                page: page,
+                balance: {
+                    bank: result[1][0].sum,
+                    available: result[2][0].sum
+                }
+            });
+            res.send(html);
     });
 });
+
+var getBankBalance = function() {
+    return db('transactions').where({ notprocessed: 'f' })
+        .select(knex.raw("sum(to_number(amount, 'S9999999.99'))"));
+};
+
+var getAvailableBalance = function() {
+    return db('transactions')
+        .select(knex.raw("sum(to_number(amount, 'S9999999.99'))"));
+};
 
 app.get('/transactions', (req, res) => {
     var html = jade.renderFile('./templates/editTransaction.jade', {
