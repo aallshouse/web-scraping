@@ -24,12 +24,10 @@ html(lang="en")
             tbody
                 each trans in transactions
                     tr
-                        td
-                            a(href='/transactions/' + trans.id + '?page=#{currentPage}')= trans.description
+                        td: a(href='/transactions/' + trans.id + '?page=#{currentPage}')= trans.description
                         td= trans.amount
                         td= trans.transactiondate
-                        td
-                            button.btn.btn-danger.btn-sm(data-id='#{trans.id}') Delete
+                        td: button.btn.btn-danger.btn-sm(data-id='#{trans.id}') Delete
         - var nextPage = currentPage + 1;
         - var prevPage = currentPage - 1;
         - prevPage = prevPage < 0 ? 1 : prevPage;
