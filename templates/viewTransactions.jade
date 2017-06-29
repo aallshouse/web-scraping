@@ -17,7 +17,8 @@ html(lang="en")
         table.table.table-striped
             thead
                 tr
-                    th.col-md-9 Description
+                    th.col-md-7 Description
+                    th.col-md-2 Category
                     th.col-md-1 Amount
                     th.col-md-1 Date
                     th.col-md-1 &nbsp;
@@ -25,6 +26,7 @@ html(lang="en")
                 each trans in transactions
                     tr
                         td: a(href='/transactions/' + trans.id + '?page=#{currentPage}')= trans.description
+                        td= trans.category
                         td= trans.amount
                         td= trans.transactiondate
                         td: button.btn.btn-danger.btn-sm(data-id='#{trans.id}') Delete

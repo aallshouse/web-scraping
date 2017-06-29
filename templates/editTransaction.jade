@@ -28,6 +28,9 @@ html(lang="en")
                                 .form-group
                                     label Date
                                     input#transactionDate.form-control(type='text', name='date', value="#{transaction ? transaction.transactiondate : ''}")
+                                .form-group
+                                    label Category
+                                    input#transactionCategory.form-control(type='text', name='category', value="#{transaction ? transaction.category : ''}")
                                 input(type='hidden', name='page', value="#{page}")
                                 button(type='submit', class='btn btn-lg btn-success') Submit
         script(src='/js/jquery.min.js')
