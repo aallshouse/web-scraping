@@ -9,6 +9,7 @@ $(function(){
                 $('#transactionAmount').val(response.amount);
                 $('#transactionDate').val(response.transactiondate);
                 $('#transactionCategory').val(response.category);
+                $('#transactionIsBill').val(response.isbill);
             }
         });
     });

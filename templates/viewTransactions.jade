@@ -4,6 +4,7 @@ html(lang="en")
         title= pageTitle
         link(rel='stylesheet', href='/css/bootstrap.min.css')
         link(rel='stylesheet', href='/css/bootstrap-theme.min.css')
+        link(rel='stylesheet', href='/css/styles.css')
     body
         .panel.panel-primary
             .panel-heading
@@ -13,6 +14,10 @@ html(lang="en")
                 h3: div.label.label-primary.label.col-md-4.col-md-offset-2 Bank Balance $#{balance.bank}
         - var currentPage = parseInt(page);
         - currentPage = currentPage === 0 ? 1 : currentPage;
+        #success-alert.alert.alert-success.hidden
+            button.close(data-dismiss="alert"): span &times;
+            strong Success!!
+            span &nbsp;Transaction has been deleted.
         h3.col-md-4 Recent transactions
         table.table.table-striped
             thead
@@ -29,7 +34,19 @@ html(lang="en")
                         td= trans.category
                         td= trans.amount
                         td= trans.transactiondate
-                        td: button.btn.btn-danger.btn-sm(data-id='#{trans.id}') Delete
+                        td: button.btn.btn-danger.btn-sm(data-toggle="modal", data-target="#deleteConfirmation") Delete
+        #deleteConfirmation.modal.fade
+            .modal-dialog
+                .modal-content
+                    .modal-header
+                        button.close(data-dismiss="modal"): span &times;
+                        h4.modal-title Delete Transaction
+                    .modal-body.
+                        Are you sure you want to delete this transaction?
+                        #[div.text-danger: strong This action CANNOT be UNDONE!!]
+                    .modal-footer
+                        button.btn.btn-default(data-dismiss="modal") Close
+                        button#deleteTransaction.btn.btn-danger Delete
         - var nextPage = currentPage + 1;
         - var prevPage = currentPage - 1;
         - prevPage = prevPage < 0 ? 1 : prevPage;

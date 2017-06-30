@@ -31,6 +31,9 @@ html(lang="en")
                                 .form-group
                                     label Category
                                     input#transactionCategory.form-control(type='text', name='category', value="#{transaction ? transaction.category : ''}")
+                                .form-group
+                                    label Recurring Bill?
+                                    input#transactionIsBill.form-control(type='text', name='isbill', value="#{transaction ? transaction.isbill : ''}")
                                 input(type='hidden', name='page', value="#{page}")
                                 button(type='submit', class='btn btn-lg btn-success') Submit
         script(src='/js/jquery.min.js')

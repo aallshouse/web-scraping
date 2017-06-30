@@ -64,7 +64,8 @@ var insertTransaction = function(data) {
         description: data.description,
         amount: data.amount,
         transactiondate: data.date,
-        category: data.category
+        category: data.category,
+        isbill: data.isbill
     }).select().first().then(t => {
         if(!t || data.allowDuplicate === 1) {
             db('transactions').insert([
@@ -72,7 +73,8 @@ var insertTransaction = function(data) {
                     description: data.description,
                     amount: data.amount,
                     transactiondate: data.date,
-                    category: data.category
+                    category: data.category,
+                    isbill: data.isbill
                 }
             ]).then(result => {
                 console.log('transaction inserted');
@@ -91,14 +93,15 @@ var updateTransaction = function(data) {
         return;
     }
 
-    console.log('Category: ' + data.category);
+    console.log('IsBill: ' + data.isbill);
 
     db('transactions').where({ id: data.id })
         .update({
             description: data.description,
             amount: data.amount,
             transactiondate: data.date,
-            category: data.category
+            category: data.category,
+            isbill: data.isbill
         }).then(result => {
             console.log('transaction updated');
         });
@@ -128,6 +131,10 @@ app.use(
 app.use(
     '/css/bootstrap-theme.min.css',
     express.static('bower_components/bootstrap/dist/css/bootstrap-theme.min.css')
+);
+app.use(
+    '/css/styles.css',
+    express.static('css/styles.css')
 );
 app.use(
     '/js/bootstrap.min.js',
@@ -205,12 +212,15 @@ app.get('/transactions', (req, res) => {
 });
 
 app.post('/transactions', (req, res) => {
+    console.log('IsBill: ' + req.body.isbill);
+
     if(req.body.id) {
         updateTransaction({
             description: req.body.description,
             amount: req.body.amount,
             date: req.body.date,
             category: req.body.category,
+            isbill: req.body.isbill,
             id: req.body.id
         });
     } else {
@@ -219,6 +229,7 @@ app.post('/transactions', (req, res) => {
             amount: req.body.amount,
             date: req.body.date,
             category: req.body.category,
+            isbill: req.body.isbill,
             allowDuplicate: req.body.allowDuplicate || 0
         });
     }
@@ -259,7 +270,7 @@ app.get('/transactions/find/:id', (req, res) => {
 var getTransaction = function(id) {
     return transactionPromise = db('transactions')
         .where({ id: id })
-        .select(knex.raw("id, description, amount, category, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
+        .select(knex.raw("id, description, amount, category, isbill, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
         .first();
 };
 
