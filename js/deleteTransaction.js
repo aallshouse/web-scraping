@@ -1,6 +1,6 @@
 $(function(){
     $('#deleteTransaction').click(function(){
-        var transId = $(this).data('id');
+        var transId = $('#transId').val();
         $.ajax({
             url: '/transactions/' + transId,
             type: 'DELETE',
@@ -11,5 +11,11 @@ $(function(){
                 $('#deleteConfirmation').modal('hide');
             }
         });
+    });
+
+    $('#deleteConfirmation').on('show.bs.modal', function(event){
+        var button = $(event.relatedTarget);
+        var transId = button.data('id');
+        $('#transId').val(transId);
     });
 });
