@@ -1,0 +1,52 @@
+doctype html
+html(lang="en")
+    head
+        title= pageTitle
+        link(rel='stylesheet', href='/css/bootstrap.min.css')
+        link(rel='stylesheet', href='/css/bootstrap-theme.min.css')
+        link(rel='stylesheet', href='/css/styles.css')
+    body
+        ul.nav.nav-pills
+            li: a(href='/transactions/view') View
+            li.active: a(href='#') Search
+        p.bg-info
+            h4: .col-md-4 Find by: #[input#searchByField(type='text', value='description')]
+            h4: .col-md-4 matches #[input#searchByValue(type='text')]
+            .col-md-4: button#searchTransactions.btn.btn-primary Search
+        table.table.table-striped
+            thead
+                tr
+                    th.col-md-7 Description
+                    th.col-md-2 Category
+                    th.col-md-1 Amount
+                    th.col-md-1 Date
+            tbody#tableBody
+        script(src='/js/jquery.min.js')
+        script(src='/js/bootstrap.min.js')
+        script(type='text/javascript').
+            var search = function(){
+                //console.log('search button clicked');
+                var searchField = $('#searchByField').val();
+                var searchValue = $('#searchByValue').val();
+                if(searchField === 'description') {
+                    $.get('/transactions/description/' + searchValue, function(response){
+                        //console.log(response);
+                        $('#tableBody').empty();
+                        $.each(response, function(index, value){
+                            var descriptionCell = "<td><a href='/transactions/' + " + value.id + ">" + value.description + "</a></td>";
+                            var categoryCell = '<td>' + value.category + '</td>';
+                            var amountCell = '<td>' + value.amount + '</td>';
+                            var dateCell = '<td>' + value.transactiondate + '</td>';
+                            
+                            var row = '<tr>' + descriptionCell + categoryCell + amountCell + dateCell + '</tr>';
+                            $('#tableBody').append(row);
+                        });
+                    });
+                }
+            };
+            $('#searchTransactions').click(search);
+            $('#searchByValue').keyup(function(){
+                if ( event.which == 13 ) {
+                    search();
+                }
+            });

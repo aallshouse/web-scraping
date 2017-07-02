@@ -246,6 +246,14 @@ app.delete('/transactions/:id', (req, res) => {
     res.end();
 });
 
+app.get('/transactions/search', (req, res) => {
+    //console.log('made it to server call /transactions/search');
+    var html = jade.renderFile('./templates/searchTransactions.jade', {
+        pageTitle: 'Search Transactions'
+    });
+    res.send(html);
+});
+
 app.get('/transactions/:id', (req, res) => {
     var transactionPromise = getTransaction(req.params.id);
     var page = req.query.page || 1;
@@ -266,6 +274,24 @@ app.get('/transactions/find/:id', (req, res) => {
         res.send(result);
     })
 });
+
+app.get('/transactions/description/:desc', (req, res) => {
+    var description = req.params.desc;
+    //console.log('Description: ' + description);
+    var transactionPromise = getTransactionByDescription(description);
+    transactionPromise.then(result => {
+        //console.log(result);
+        res.send(result);
+    });
+});
+
+var getTransactionByDescription = function(desc) {
+    return transactionPromise = db('transactions')
+        .whereRaw('description ilike ?', '%' + desc + '%')
+        .orderBy('transactiondate', 'desc')
+        .orderBy('id', 'desc')
+        .select(knex.raw("id, description, amount, category, isbill, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"));
+};
 
 var getTransaction = function(id) {
     return transactionPromise = db('transactions')

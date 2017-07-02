@@ -18,7 +18,10 @@ html(lang="en")
             button.close(data-dismiss="alert"): span &times;
             strong Success!!
             span &nbsp;Transaction has been deleted.
-        h3.col-md-4 Recent transactions
+        ul.nav.nav-pills
+            li.active: a(href='#') View
+            li: a(href='/transactions/search') Search
+        h3.col-md-6.clearfix Recent transactions
         table.table.table-striped
             thead
                 tr
