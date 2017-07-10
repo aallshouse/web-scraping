@@ -214,7 +214,7 @@ app.get('/transactions', (req, res) => {
 });
 
 app.post('/transactions', (req, res) => {
-    console.log('NotProcessed: ' + req.body.notprocessed);
+    //console.log('NotProcessed: ' + req.body.notprocessed);
     var notProcessed = req.body.notprocessed === 'on' ? true : false;
 
     if(req.body.id) {
