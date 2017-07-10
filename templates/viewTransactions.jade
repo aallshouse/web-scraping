@@ -18,9 +18,16 @@ html(lang="en")
             button.close(data-dismiss="alert"): span &times;
             strong Success!!
             span &nbsp;Transaction has been deleted.
+        - var nextPage = currentPage + 1;
+        - var prevPage = currentPage - 1;
+        - prevPage = prevPage < 0 ? 1 : prevPage;
         ul.nav.nav-pills
             li.active: a(href='#') View
             li: a(href='/transactions/search') Search
+            li: a(href='/transactions?page=#{currentPage}') Add/Edit
+        .bg-info.col-md-12.margin-top-30
+            a.col-md-2(href='/transactions/view?page=#{prevPage}') View Previous Page
+            a.col-md-2.col-md-offset-8.text-right(href='/transactions/view?page=#{nextPage}') View Next Page
         h3.col-md-6.clearfix Recent transactions
         table.table.table-striped
             thead
@@ -53,12 +60,6 @@ html(lang="en")
                     .modal-footer
                         button.btn.btn-default(data-dismiss="modal") Close
                         button#deleteTransaction.btn.btn-danger Delete
-        - var nextPage = currentPage + 1;
-        - var prevPage = currentPage - 1;
-        - prevPage = prevPage < 0 ? 1 : prevPage;
-        a.col-md-4(href='/transactions/view?page=#{prevPage}') View Previous Page
-        a.col-md-4(href='/transactions/view?page=#{nextPage}') View Next Page
-        a(href='/transactions?page=#{currentPage}') Add Transaction
         script(src='/js/jquery.min.js')
         script(src='/js/bootstrap.min.js')
         script(src='/js/deleteTransaction.js')

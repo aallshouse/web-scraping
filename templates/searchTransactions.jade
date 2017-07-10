@@ -9,6 +9,7 @@ html(lang="en")
         ul.nav.nav-pills
             li: a(href='/transactions/view') View
             li.active: a(href='#') Search
+            li: a(href='/transactions?page=#{currentPage}') Add/Edit
         p.bg-info
             h4: .col-md-4 Find by: #[input#searchByField(type='text', value='description')]
             h4: .col-md-4 matches #[input#searchByValue(type='text')]
