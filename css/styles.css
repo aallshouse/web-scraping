@@ -5,3 +5,11 @@
     width: 400px;
     right: 10px;
 }
+
+.no-left-margin {
+    margin-left: 0 !important;
+}
+
+.glyphicon {
+    margin-left: 10px;
+}

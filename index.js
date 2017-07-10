@@ -50,7 +50,7 @@ var getTransactions = function(data) {
     return transactionPromise = db('transactions')
         .orderBy('transactiondate', 'desc')
         .orderBy('id', 'desc')
-        .select(knex.raw("id, description, amount, category, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
+        .select(knex.raw("id, description, amount, category, notprocessed, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
         .limit(count).offset(page*count);
 };
 
@@ -74,7 +74,8 @@ var insertTransaction = function(data) {
                     amount: data.amount,
                     transactiondate: data.date,
                     category: data.category,
-                    isbill: data.isbill
+                    isbill: data.isbill,
+                    notprocessed: data.notprocessed
                 }
             ]).then(result => {
                 console.log('transaction inserted');
@@ -93,15 +94,14 @@ var updateTransaction = function(data) {
         return;
     }
 
-    console.log('IsBill: ' + data.isbill);
-
     db('transactions').where({ id: data.id })
         .update({
             description: data.description,
             amount: data.amount,
             transactiondate: data.date,
             category: data.category,
-            isbill: data.isbill
+            isbill: data.isbill,
+            notprocessed: data.notprocessed
         }).then(result => {
             console.log('transaction updated');
         });
@@ -122,8 +122,10 @@ var deleteTransaction = function(id) {
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-//app.set('view engine', 'jade');
-
+app.use(
+    '/fonts',
+    express.static('bower_components/bootstrap/dist/fonts')
+);
 app.use(
     '/css/bootstrap.min.css',
     express.static('bower_components/bootstrap/dist/css/bootstrap.min.css')
@@ -212,7 +214,8 @@ app.get('/transactions', (req, res) => {
 });
 
 app.post('/transactions', (req, res) => {
-    console.log('IsBill: ' + req.body.isbill);
+    console.log('NotProcessed: ' + req.body.notprocessed);
+    var notProcessed = req.body.notprocessed === 'on' ? true : false;
 
     if(req.body.id) {
         updateTransaction({
@@ -221,6 +224,7 @@ app.post('/transactions', (req, res) => {
             date: req.body.date,
             category: req.body.category,
             isbill: req.body.isbill,
+            notprocessed: notProcessed,
             id: req.body.id
         });
     } else {
@@ -230,6 +234,7 @@ app.post('/transactions', (req, res) => {
             date: req.body.date,
             category: req.body.category,
             isbill: req.body.isbill,
+            notprocessed: notProcessed,
             allowDuplicate: req.body.allowDuplicate || 0
         });
     }
@@ -258,6 +263,7 @@ app.get('/transactions/:id', (req, res) => {
     var transactionPromise = getTransaction(req.params.id);
     var page = req.query.page || 1;
     transactionPromise.then(result => {
+        console.log(result);
         var html = jade.renderFile('./templates/editTransaction.jade', {
             pageTitle: 'Update Transaction',
             transaction: result,
@@ -296,7 +302,7 @@ var getTransactionByDescription = function(desc) {
 var getTransaction = function(id) {
     return transactionPromise = db('transactions')
         .where({ id: id })
-        .select(knex.raw("id, description, amount, category, isbill, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
+        .select(knex.raw("id, description, amount, category, isbill, notprocessed, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
         .first();
 };
 

@@ -34,6 +34,8 @@ html(lang="en")
                 each trans in transactions
                     tr
                         td: a(href='/transactions/' + trans.id + '?page=#{currentPage}')= trans.description
+                            if trans.notprocessed
+                                span.text-danger: span.glyphicon.glyphicon-exclamation-sign
                         td= trans.category
                         td= trans.amount
                         td= trans.transactiondate

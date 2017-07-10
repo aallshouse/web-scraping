@@ -4,6 +4,7 @@ html(lang="en")
         title= pageTitle
         link(rel='stylesheet', href='/css/bootstrap.min.css')
         link(rel='stylesheet', href='/css/bootstrap-theme.min.css')
+        link(rel='stylesheet', href='/css/styles.css')
     body
         .container
             .row
@@ -34,6 +35,9 @@ html(lang="en")
                                 .form-group
                                     label Recurring Bill?
                                     input#transactionIsBill.form-control(type='text', name='isbill', value="#{transaction ? transaction.isbill : ''}")
+                                .checkbox
+                                    input.no-left-margin(type="checkbox", name='notprocessed', checked=transaction && transaction.notprocessed)
+                                    label Not Processed?
                                 input(type='hidden', name='page', value="#{page}")
                                 button(type='submit', class='btn btn-lg btn-success') Submit
         script(src='/js/jquery.min.js')
