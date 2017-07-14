@@ -291,6 +291,23 @@ app.get('/transactions/description/:desc', (req, res) => {
     });
 });
 
+app.get('/transactions/notprocessed/:searchvalue', (req, res) => {
+    var searchValue = req.params.searchvalue;
+    var transactionPromise = getTransactionByNotProcessed(searchValue);
+    transactionPromise.then(result => {
+        //console.log(result);
+        res.send(result);
+    });
+});
+
+var getTransactionByNotProcessed = function(searchValue) {
+    return transactionPromise = db('transactions')
+        .whereRaw('notprocessed = ?', searchValue)
+        .orderBy('transactiondate', 'desc')
+        .orderBy('id', 'desc')
+        .select(knex.raw("id, description, amount, category, isbill, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"));
+};
+
 var getTransactionByDescription = function(desc) {
     return transactionPromise = db('transactions')
         .whereRaw('description ilike ?', '%' + desc + '%')
