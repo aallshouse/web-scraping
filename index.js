@@ -247,7 +247,7 @@ app.post('/transactions', (req, res) => {
 
 app.delete('/transactions/:id', (req, res) => {
     console.log('delete transaction id ' + req.params.id);
-    //deleteTransaction(req.params.id);
+    deleteTransaction(req.params.id);
     res.end();
 });
 
