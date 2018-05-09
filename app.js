@@ -13,17 +13,17 @@ const db = knex({
     }
 });
 
-var transactionTable = 'transactions';
+var transactionTable = 'staging.transactions';
 
 //probably need a .then() call after below to get it to execute the promise
-db.schema.createTableIfNotExists(transactionTable, table => {
-    table.increments('id').primary();
-    table.string('description');
-    table.string('amount');
-    table.date('transactiondate');
-}).then(result => {
-    console.log(result);
-});
+// db.schema.createTableIfNotExists(transactionTable, table => {
+//     table.increments('id').primary();
+//     table.string('description');
+//     table.string('amount');
+//     table.date('transactiondate');
+// }).then(result => {
+//     console.log(result);
+// });
 
 // db('articles').insert([
 //     { title: 'Winds of Winter' }
@@ -35,7 +35,7 @@ db.schema.createTableIfNotExists(transactionTable, table => {
 //     console.log(t.title);
 // });
 
-fs.createReadStream('transactions-export-2017.csv')
+fs.createReadStream('export-3.csv')
     .pipe(csv())
     .on('data', function (data) {
         var description = data.Description === 'Check'

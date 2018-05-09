@@ -41,6 +41,8 @@ var dataIsValid = function(data) {
 };
 
 var getTransactions = function(data) {
+    console.log('executing getTransactions()');
+
     var page = data.page;
     if(page > 0) {
         page = page - 1;
@@ -48,8 +50,7 @@ var getTransactions = function(data) {
     
     var count = data.count || 10;
     return transactionPromise = db('transactions')
-        .orderBy('transactiondate', 'desc')
-        .orderBy('id', 'desc')
+        .orderByRaw("date_part('year', transactiondate) desc, date_part('month', transactiondate) desc, date_part('day', transactiondate) desc")
         .select(knex.raw("id, description, amount, category, notprocessed, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
         .limit(count).offset(page*count);
 };
@@ -303,16 +304,14 @@ app.get('/transactions/notprocessed/:searchvalue', (req, res) => {
 var getTransactionByNotProcessed = function(searchValue) {
     return transactionPromise = db('transactions')
         .whereRaw('notprocessed = ?', searchValue)
-        .orderBy('transactiondate', 'desc')
-        .orderBy('id', 'desc')
+        .orderByRaw("date_part('year', transactiondate) desc, date_part('month', transactiondate) desc, date_part('day', transactiondate) desc")
         .select(knex.raw("id, description, amount, category, isbill, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"));
 };
 
 var getTransactionByDescription = function(desc) {
     return transactionPromise = db('transactions')
         .whereRaw('description ilike ?', '%' + desc + '%')
-        .orderBy('transactiondate', 'desc')
-        .orderBy('id', 'desc')
+        .orderByRaw("date_part('year', transactiondate) desc, date_part('month', transactiondate) desc, date_part('day', transactiondate) desc")
         .select(knex.raw("id, description, amount, category, isbill, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"));
 };
 
