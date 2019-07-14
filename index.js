@@ -4,6 +4,11 @@ const articles = [{ title: 'Example' }];
 var jade = require('jade');
 var bodyParser = require('body-parser');
 
+const tableNames = {
+    transactions: 'transactions',
+    creditCards: 'creditcards'
+};
+
 const knex = require('knex');
 const db = knex({
     client: 'pg',
@@ -48,8 +53,8 @@ var getTransactions = function(data) {
         page = page - 1;
     }
     
-    var count = data.count || 10;
-    return transactionPromise = db('transactions')
+    var count = data.count || 20;
+    return transactionPromise = db(tableNames.transactions)
         .orderByRaw("date_part('year', transactiondate) desc, date_part('month', transactiondate) desc, date_part('day', transactiondate) desc")
         .select(knex.raw("id, description, amount, category, notprocessed, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
         .limit(count).offset(page*count);
@@ -61,7 +66,7 @@ var insertTransaction = function(data) {
         return;
     }
 
-    db('transactions').where({
+    db(tableNames.transactions).where({
         description: data.description,
         amount: data.amount,
         transactiondate: data.date,
@@ -69,7 +74,7 @@ var insertTransaction = function(data) {
         isbill: data.isbill
     }).select().first().then(t => {
         if(!t || data.allowDuplicate === 1) {
-            db('transactions').insert([
+            db(tableNames.transactions).insert([
                 {
                     description: data.description,
                     amount: data.amount,
@@ -95,7 +100,7 @@ var updateTransaction = function(data) {
         return;
     }
 
-    db('transactions').where({ id: data.id })
+    db(tableNames.transactions).where({ id: data.id })
         .update({
             description: data.description,
             amount: data.amount,
@@ -114,7 +119,7 @@ var deleteTransaction = function(id) {
         return;
     }
 
-    db('transactions').where({ id: id }).del()
+    db(tableNames.transactions).where({ id: id }).del()
         .then(result => {
             console.log('transaction deleted');
         });
@@ -154,6 +159,10 @@ app.use(
 app.use(
     '/js/findTransaction.js',
     express.static('js/findTransaction.js')
+);
+app.use(
+    '/js/creditCardStatus.js',
+    express.static('js/creditCardStatus.js')
 );
 
 app.get('/', (req, res, next) => {
@@ -198,12 +207,12 @@ app.get('/transactions/view', (req, res) => {
 });
 
 var getBankBalance = function() {
-    return db('transactions').where({ notprocessed: 'f' })
+    return db(tableNames.transactions).where({ notprocessed: 'f' })
         .select(knex.raw("sum(to_number(amount, 'S9999999.99'))"));
 };
 
 var getAvailableBalance = function() {
-    return db('transactions')
+    return db(tableNames.transactions)
         .select(knex.raw("sum(to_number(amount, 'S9999999.99'))"));
 };
 
@@ -301,22 +310,63 @@ app.get('/transactions/notprocessed/:searchvalue', (req, res) => {
     });
 });
 
+app.get('/credit/find/:id', (req, res) => {
+    var creditCardStatusId = req.params.id;
+    var creditCardPromise = db(tableNames.creditCards)
+        .whereRaw('id = ?', creditCardStatusId)
+        .select().first();
+    creditCardPromise.then(result => {
+        //console.log(result);
+        res.send(result);
+    });
+});
+
+app.get('/credit', (req, res) => {
+    var html = jade.renderFile('./templates/creditCardStatus.jade', {
+        pageTitle: 'Credit Card Status'
+    });
+    res.send(html);
+});
+
+app.post('/credit', (req, res) => {
+    let data = req.body;
+    //console.log(`data: ${data}`);
+    let currentDate = new Date();
+    //let dateEntered = currentDate.toISOString().split('T')[0];
+    //console.log(`dateEntered: ${dateEntered}`);
+    db(tableNames.creditCards).insert(
+        {
+            //id: 51, //TODO: ID needs updated on each insert
+            companyname: data.companyname,
+            availablecredit: data.availablecredit,
+            balance: data.balance,
+            nextduedate: data.nextduedate === "" ? null : data.nextduedate,
+            dateentered: data.dateentered === "" ? currentDate.toISOString() : data.dateentered
+        }
+    ).then(result => {
+        console.log(result);
+        console.log('credit card status inserted');
+    });
+    //res.end();
+    res.redirect('/credit');
+});
+
 var getTransactionByNotProcessed = function(searchValue) {
-    return transactionPromise = db('transactions')
+    return transactionPromise = db(tableNames.transactions)
         .whereRaw('notprocessed = ?', searchValue)
         .orderByRaw("date_part('year', transactiondate) desc, date_part('month', transactiondate) desc, date_part('day', transactiondate) desc")
         .select(knex.raw("id, description, amount, category, isbill, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"));
 };
 
 var getTransactionByDescription = function(desc) {
-    return transactionPromise = db('transactions')
+    return transactionPromise = db(tableNames.transactions)
         .whereRaw('description ilike ?', '%' + desc + '%')
         .orderByRaw("date_part('year', transactiondate) desc, date_part('month', transactiondate) desc, date_part('day', transactiondate) desc")
         .select(knex.raw("id, description, amount, category, isbill, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"));
 };
 
 var getTransaction = function(id) {
-    return transactionPromise = db('transactions')
+    return transactionPromise = db(tableNames.transactions)
         .where({ id: id })
         .select(knex.raw("id, description, amount, category, isbill, notprocessed, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
         .first();

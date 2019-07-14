@@ -13,7 +13,7 @@ const db = knex({
     }
 });
 
-var transactionTable = 'staging.transactions';
+var transactionTable = 'transactions';
 
 //probably need a .then() call after below to get it to execute the promise
 // db.schema.createTableIfNotExists(transactionTable, table => {
@@ -35,7 +35,7 @@ var transactionTable = 'staging.transactions';
 //     console.log(t.title);
 // });
 
-fs.createReadStream('export-3.csv')
+fs.createReadStream('export-9.csv')
     .pipe(csv())
     .on('data', function (data) {
         var description = data.Description === 'Check'
