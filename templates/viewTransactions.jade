@@ -24,11 +24,11 @@ html(lang="en")
         ul.nav.nav-pills
             li.active: a(href='#') View
             li: a(href='/transactions/search') Search
-            li: a(href='/transactions?page=#{currentPage}') Add/Edit
+            li: a(href=`/transactions?page=${currentPage}`) Add/Edit
             li: a(href='/credit') Credit Cards
         .bg-info.col-md-12.margin-top-30
-            a.col-md-2(href='/transactions/view?page=#{prevPage}') View Previous Page
-            a.col-md-2.col-md-offset-8.text-right(href='/transactions/view?page=#{nextPage}') View Next Page
+            a.col-md-2(href=`/transactions/view?page=${prevPage}`) View Previous Page
+            a.col-md-2.col-md-offset-8.text-right(href=`/transactions/view?page=${nextPage}`) View Next Page
         h3.col-md-6.clearfix Recent transactions
         table.table.table-striped
             thead
@@ -41,7 +41,7 @@ html(lang="en")
             tbody
                 each trans in transactions
                     tr
-                        td: a(href='/transactions/' + trans.id + '?page=#{currentPage}')= trans.description
+                        td: a(href=`/transactions/${trans.id}?page=${currentPage}`)= trans.description
                             if trans.notprocessed
                                 span.text-danger: span.glyphicon.glyphicon-exclamation-sign
                         td= trans.category
