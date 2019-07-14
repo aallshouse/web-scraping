@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const articles = [{ title: 'Example' }];
-var jade = require('jade');
+var jade = require('pug');
 var bodyParser = require('body-parser');
 
 const tableNames = {
