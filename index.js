@@ -55,7 +55,7 @@ var getTransactions = function(data) {
     
     var count = data.count || 20;
     return transactionPromise = db(tableNames.transactions)
-        .orderByRaw("date_part('year', transactiondate) desc, date_part('month', transactiondate) desc, date_part('day', transactiondate) desc")
+        .orderByRaw("date_part('year', transactiondate) desc, date_part('month', transactiondate) desc, date_part('day', transactiondate) desc, description")
         .select(knex.raw("id, description, amount, category, notprocessed, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
         .limit(count).offset(page*count);
 };
