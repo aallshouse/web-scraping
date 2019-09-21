@@ -35,7 +35,7 @@ var transactionTable = 'transactions';
 //     console.log(t.title);
 // });
 
-fs.createReadStream('export-9.csv')
+fs.createReadStream('export-8.csv')
     .pipe(csv())
     .on('data', function (data) {
         var description = data.Description === 'Check'
@@ -52,7 +52,8 @@ fs.createReadStream('export-9.csv')
                     {
                         description: description,
                         amount: amount,
-                        transactiondate: data.Date
+                        transactiondate: data.Date,
+                        notprocessed: false
                     }
                 ]).then(result => {
                     console.log('inserted');
