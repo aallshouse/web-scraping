@@ -43,11 +43,11 @@ html(lang="en")
                     tr
                         td: a(href=`/transactions/${trans.id}?page=${currentPage}`)= trans.description
                             if trans.notprocessed
-                                span.text-danger: span.glyphicon.glyphicon-exclamation-sign
+                                a.not-processed(href=`#`, data-id=`${trans.id}`): span.text-danger: span.glyphicon.glyphicon-exclamation-sign
                         td= trans.category
                         td= trans.amount
                         td= trans.transactiondate
-                        td: button.btn.btn-danger.btn-sm(data-toggle="modal", data-target="#deleteConfirmation", data-id='#{trans.id}') Delete
+                        td: button.btn.btn-danger.btn-sm(data-toggle="modal", data-target="#deleteConfirmation", data-id=`${trans.id}`) Delete
         #deleteConfirmation.modal.fade
             .modal-dialog
                 .modal-content
@@ -64,3 +64,4 @@ html(lang="en")
         script(src='/js/jquery.min.js')
         script(src='/js/bootstrap.min.js')
         script(src='/js/deleteTransaction.js')
+        script(src='/js/notProcessed.js')

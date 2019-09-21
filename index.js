@@ -52,7 +52,7 @@ var getTransactions = function(data) {
     if(page > 0) {
         page = page - 1;
     }
-    
+
     var count = data.count || 20;
     return transactionPromise = db(tableNames.transactions)
         .orderByRaw("date_part('year', transactiondate) desc, date_part('month', transactiondate) desc, date_part('day', transactiondate) desc, description")
@@ -113,6 +113,22 @@ var updateTransaction = function(data) {
         });
 };
 
+var updateNotProcessed = function(id) {
+    if(!id) {
+        console.log('error reading id for update');
+        return;
+    }
+
+    db(tableNames.transactions).where({ id: id })
+        .update({
+            notprocessed: 'f'
+        })
+        .then(result => {
+            console.log('transaction updated');
+            //TODO: refresh bank balance
+        });
+};
+
 var deleteTransaction = function(id) {
     if(!id) {
         console.log('error reading id for delete');
@@ -163,6 +179,10 @@ app.use(
 app.use(
     '/js/creditCardStatus.js',
     express.static('js/creditCardStatus.js')
+);
+app.use(
+    '/js/notProcessed.js',
+    express.static('js/notProcessed.js')
 );
 
 app.get('/', (req, res, next) => {
@@ -253,6 +273,12 @@ app.post('/transactions', (req, res) => {
     //TODO: redirect needs to send the updated data
     var page = req.body.page || 1;
     res.redirect('/transactions/view?page=' + page);
+});
+
+app.post('/transactions/processed/:id', (req, res) => {
+    console.log(`id ${req.params.id} has been processed by bank`);
+    updateNotProcessed(req.params.id);
+    res.end();
 });
 
 app.delete('/transactions/:id', (req, res) => {
