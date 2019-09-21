@@ -22,24 +22,24 @@ html(lang="en")
                                 .form-group
                                     label Credit Card Status Id
                                     .input-group
-                                        input.form-control(type='text', name='id', value="#{creditCardStatus ? creditCardStatus.id : ''}")
+                                        input.form-control(type='text', name='id', value=`${creditCardStatus ? creditCardStatus.id : ''}`)
                                         span.input-group-btn
                                             btn.btn.btn-info Find
                                 .form-group
                                     label Company Name
-                                    input#companyName.form-control(type='text', name='companyname', value="#{creditCardStatus ? creditCardStatus.companyname : ''}")
+                                    input#companyName.form-control(type='text', name='companyname', value=`${creditCardStatus ? creditCardStatus.companyname : ''}`)
                                 .form-group
                                     label Available Credit
-                                    input#availableCredit.form-control(type='text', name='availablecredit', value="#{creditCardStatus ? creditCardStatus.availablecredit : ''}")
+                                    input#availableCredit.form-control(type='text', name='availablecredit', value=`${creditCardStatus ? creditCardStatus.availablecredit : ''}`)
                                 .form-group
                                     label Balance
-                                    input#balance.form-control(type='text', name='balance', value="#{creditCardStatus ? creditCardStatus.balance : ''}")
+                                    input#balance.form-control(type='text', name='balance', value=`${creditCardStatus ? creditCardStatus.balance : ''}`)
                                 .form-group
                                     label Date Entered
-                                    input#dateEntered.form-control(type='text', name='dateentered', value="#{creditCardStatus ? creditCardStatus.dateentered : ''}")
+                                    input#dateEntered.form-control(type='text', name='dateentered', value=`${creditCardStatus ? creditCardStatus.dateentered : ''}`)
                                 .form-group
                                     label Next Due Date
-                                    input#nextDueDate.form-control(type='text', name='nextduedate', value="#{creditCardStatus ? creditCardStatus.nextduedate : ''}")
+                                    input#nextDueDate.form-control(type='text', name='nextduedate', value=`${creditCardStatus ? creditCardStatus.nextduedate : ''}`)
                                 button(type='submit', class='btn btn-lg btn-success') Submit
         script(src='/js/jquery.min.js')
         script(src='/js/bootstrap.min.js')
