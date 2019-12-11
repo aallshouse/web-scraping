@@ -35,7 +35,8 @@ var transactionTable = 'transactions';
 //     console.log(t.title);
 // });
 
-fs.createReadStream('export-8.csv')
+let x = 0;
+fs.createReadStream('export-12.csv')
     .pipe(csv())
     .on('data', function (data) {
         var description = data.Description === 'Check'
@@ -56,8 +57,11 @@ fs.createReadStream('export-8.csv')
                         notprocessed: false
                     }
                 ]).then(result => {
+                    x++;
                     console.log('inserted');
                 });
             }
         });
     });
+//TODO: move this within the above promise, after the select then
+//console.log(`${x} rows inserted`);
