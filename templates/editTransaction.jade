@@ -43,6 +43,9 @@ html(lang="en")
                                 .checkbox
                                     input.no-left-margin(type="checkbox", name='notprocessed', checked=transaction && transaction.notprocessed)
                                     label Not Processed?
+                                .checkbox
+                                    input.no-left-margin(type="checkbox", name='pending', checked=transaction && transaction.pending)
+                                    label Pending?
                                 input(type='hidden', name='page', value=`${page}`)
                                 button(type='submit', class='btn btn-lg btn-success') Submit
         script(src='/js/jquery.min.js')

@@ -11,6 +11,7 @@ html(lang="en")
                 h4 Balance Info
             .panel-body
                 h3: div.label.label-primary.col-md-4 Available Balance $#{balance.available}
+                h3: div.label.label-primary.col-md-4 Pending Bank Balance $#{balance.pending}
                 h3: div.label.label-primary.label.col-md-4.col-md-offset-2 Bank Balance $#{balance.bank}
         - var currentPage = parseInt(page);
         - currentPage = currentPage === 0 ? 1 : currentPage;
@@ -44,6 +45,8 @@ html(lang="en")
                         td: a(href=`/transactions/${trans.id}?page=${currentPage}`)= trans.description
                             if trans.notprocessed
                                 a.not-processed(href=`#`, data-id=`${trans.id}`): span.text-danger: span.glyphicon.glyphicon-exclamation-sign
+                            if trans.pending
+                                a.pending(href=`#`, data-id=`${trans.id}`): span.glyphicon-warning-color: span.glyphicon.glyphicon-warning-sign
                         td= trans.category
                         td= trans.amount
                         td= trans.transactiondate

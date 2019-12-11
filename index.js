@@ -56,7 +56,7 @@ var getTransactions = function(data) {
     var count = data.count || 20;
     return transactionPromise = db(tableNames.transactions)
         .orderByRaw("date_part('year', transactiondate) desc, date_part('month', transactiondate) desc, date_part('day', transactiondate) desc, description")
-        .select(knex.raw("id, description, amount, category, notprocessed, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
+        .select(knex.raw("id, description, amount, category, notprocessed, pending, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
         .limit(count).offset(page*count);
 };
 
@@ -81,7 +81,8 @@ var insertTransaction = function(data) {
                     transactiondate: data.date,
                     category: data.category,
                     isbill: data.isbill,
-                    notprocessed: data.notprocessed
+                    notprocessed: data.notprocessed,
+                    pending: data.pending
                 }
             ]).then(result => {
                 console.log('transaction inserted');
@@ -107,7 +108,8 @@ var updateTransaction = function(data) {
             transactiondate: data.date,
             category: data.category,
             isbill: data.isbill,
-            notprocessed: data.notprocessed
+            notprocessed: data.notprocessed,
+            pending: data.pending
         }).then(result => {
             console.log('transaction updated');
         });
@@ -209,9 +211,10 @@ app.get('/transactions/view', (req, res) => {
 
     var bankBalancePromise = getBankBalance();
     var availableBalancePromise = getAvailableBalance();
+    var pendingBankBalance = getPendingBalance();
 
     //resolve promises and return data with html
-    Promise.all([transactionPromise, bankBalancePromise, availableBalancePromise])
+    Promise.all([transactionPromise, bankBalancePromise, availableBalancePromise, pendingBankBalance])
         .then(result => {
             var html = jade.renderFile('./templates/viewTransactions.jade', {
                 pageTitle: 'View Transactions',
@@ -219,7 +222,8 @@ app.get('/transactions/view', (req, res) => {
                 page: page,
                 balance: {
                     bank: result[1][0].sum,
-                    available: result[2][0].sum
+                    available: result[2][0].sum,
+                    pending: result[3][0].sum
                 }
             });
             res.send(html);
@@ -227,12 +231,17 @@ app.get('/transactions/view', (req, res) => {
 });
 
 var getBankBalance = function() {
-    return db(tableNames.transactions).where({ notprocessed: 'f' })
+    return db(tableNames.transactions).where({ notprocessed: 'f', pending: 'f' })
         .select(knex.raw("sum(to_number(amount, 'S9999999.99'))"));
 };
 
 var getAvailableBalance = function() {
     return db(tableNames.transactions)
+        .select(knex.raw("sum(to_number(amount, 'S9999999.99'))"));
+};
+
+var getPendingBalance = function() {
+    return db(tableNames.transactions).where({ pending: 't' }).orWhere({ notprocessed: 'f', pending: 'f' })
         .select(knex.raw("sum(to_number(amount, 'S9999999.99'))"));
 };
 
@@ -246,6 +255,9 @@ app.get('/transactions', (req, res) => {
 app.post('/transactions', (req, res) => {
     //console.log('NotProcessed: ' + req.body.notprocessed);
     var notProcessed = req.body.notprocessed === 'on' ? true : false;
+    var pending = req.body.pending === 'on' ? true : false;
+    console.log('req.body.pending', req.body.pending);
+    console.log('pending', pending);
 
     if(req.body.id) {
         updateTransaction({
@@ -255,7 +267,8 @@ app.post('/transactions', (req, res) => {
             category: req.body.category,
             isbill: req.body.isbill,
             notprocessed: notProcessed,
-            id: req.body.id
+            id: req.body.id,
+            pending: pending
         });
     } else {
         insertTransaction({
@@ -265,6 +278,7 @@ app.post('/transactions', (req, res) => {
             category: req.body.category,
             isbill: req.body.isbill,
             notprocessed: notProcessed,
+            pending: pending,
             allowDuplicate: req.body.allowDuplicate || 0
         });
     }
@@ -397,7 +411,7 @@ var getTransactionByNotProcessed = function(searchValue) {
     return transactionPromise = db(tableNames.transactions)
         .whereRaw('notprocessed = ?', searchValue)
         .orderByRaw("date_part('year', transactiondate) desc, date_part('month', transactiondate) desc, date_part('day', transactiondate) desc")
-        .select(knex.raw("id, description, amount, category, isbill, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"));
+        .select(knex.raw("id, description, amount, category, isbill, pending, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"));
 };
 
 var getTransactionByDescription = function(desc) {
@@ -410,7 +424,7 @@ var getTransactionByDescription = function(desc) {
 var getTransaction = function(id) {
     return transactionPromise = db(tableNames.transactions)
         .where({ id: id })
-        .select(knex.raw("id, description, amount, category, isbill, notprocessed, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
+        .select(knex.raw("id, description, amount, category, isbill, notprocessed, pending, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
         .first();
 };
 
