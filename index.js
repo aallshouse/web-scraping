@@ -336,6 +336,15 @@ app.get('/transactions/notprocessed/:searchvalue', (req, res) => {
     });
 });
 
+app.get('/transactions/category/:searchvalue', (req, res) => {
+    var searchValue = req.params.searchvalue;
+    var transactionPromise = getTransactionByCategory(searchValue);
+    transactionPromise.then(result => {
+        //console.log(result);
+        res.send(result);
+    });
+});
+
 app.get('/credit/find/:id', (req, res) => {
     var creditCardStatusId = req.params.id;
     var creditCardPromise = db(tableNames.creditCards)
@@ -376,6 +385,13 @@ app.post('/credit', (req, res) => {
     //res.end();
     res.redirect('/credit');
 });
+
+var getTransactionByCategory = function(searchValue) {
+    return transactionPromise = db(tableNames.transactions)
+        .whereRaw('category = ?', searchValue)
+        .orderByRaw("date_part('year', transactiondate) desc, date_part('month', transactiondate) desc, date_part('day', transactiondate) desc")
+        .select(knex.raw("id, description, amount, category, isbill, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"));
+};
 
 var getTransactionByNotProcessed = function(searchValue) {
     return transactionPromise = db(tableNames.transactions)
