@@ -131,6 +131,22 @@ var updateNotProcessed = function(id) {
         });
 };
 
+var updatePending = function(id) {
+    if(!id) {
+        console.log('error reading id for update');
+        return;
+    }
+
+    db(tableNames.transactions).where({ id: id })
+        .update({
+            pending: 'f'
+        })
+        .then(result => {
+            console.log('transaction updated');
+            //TODO: refresh bank balance
+        });
+};
+
 var deleteTransaction = function(id) {
     if(!id) {
         console.log('error reading id for delete');
@@ -292,6 +308,12 @@ app.post('/transactions', (req, res) => {
 app.post('/transactions/processed/:id', (req, res) => {
     console.log(`id ${req.params.id} has been processed by bank`);
     updateNotProcessed(req.params.id);
+    res.end();
+});
+
+app.post('/transactions/pending/:id', (req, res) => {
+    console.log(`id ${req.params.id} has been processed (was pending) by bank`);
+    updatePending(req.params.id);
     res.end();
 });
 

@@ -11,4 +11,17 @@ $(function(){
             }
         });
     });
+
+    $('.pending').click(function(e){
+        e.preventDefault();
+        var that = $(this);
+        var transId = that.data('id');
+        $.ajax({
+            url: '/transactions/pending/' + transId,
+            type: 'POST',
+            success: function(){
+                that.remove();
+            }
+        });
+    });
 });
