@@ -12,7 +12,12 @@ html(lang="en")
             li: a(href='/transactions?page=#{currentPage}') Add/Edit
             li: a(href='/credit') Credit Cards
         p.bg-info
-            h4: .col-md-4 Find by: #[input#searchByField(type='text', value='description')]
+            h4: .col-md-4 Find by:
+                select#searchByField
+                    option description
+                    option notprocessed
+                    option pending
+                    option category
             h4: .col-md-4 matches #[input#searchByValue(type='text')]
             .col-md-4: button#searchTransactions.btn.btn-primary Search
         table.table.table-striped
@@ -48,6 +53,30 @@ html(lang="en")
 
                 if(searchField === 'notprocessed') {
                     $.get('/transactions/notprocessed/' + searchValue, function(response){
+                        //console.log(response);
+                        $('#tableBody').empty();
+                        $.each(response, function(index, value){
+                            //- console.log('notprocessed value', value);
+                            if(value.pending) {
+                                var descriptionCell = "<td><a href='/transactions/" + value.id + "'>" + value.description + "</a><span class='glyphicon-warning-color'><span class='glyphicon glyphicon-warning-sign'></span></span></td>";
+                            } else if(value.notprocessed) {
+                                var descriptionCell = "<td><a href='/transactions/" + value.id + "'>" + value.description + "</a><span class='text-danger'><span class='glyphicon glyphicon-exclamation-sign'></span></span></td>";
+                            } else {
+                                var descriptionCell = "<td><a href='/transactions/" + value.id + "'>" + value.description + "</a></td>";
+                            }
+                            var categoryCell = '<td>' + value.category + '</td>';
+                            var amountCell = '<td>' + value.amount + '</td>';
+                            var dateCell = '<td>' + value.transactiondate + '</td>';
+                            
+                            var row = '<tr>' + descriptionCell + categoryCell + amountCell + dateCell + '</tr>';
+                            $('#tableBody').append(row);
+                        });
+                        //TODO: if no rows, create a row and state none found
+                    });
+                }
+
+                if(searchField === 'pending') {
+                    $.get('/transactions/pending/' + searchValue, function(response){
                         //console.log(response);
                         $('#tableBody').empty();
                         $.each(response, function(index, value){

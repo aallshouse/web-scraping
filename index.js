@@ -280,8 +280,10 @@ app.get('/transactions', (req, res) => {
 
 app.post('/transactions', (req, res) => {
     //console.log('NotProcessed: ' + req.body.notprocessed);
-    var notProcessed = req.body.notprocessed === 'on' ? true : false;
+    // console.log('req.body', req.body);
+    var notprocessed = req.body.notprocessed === 'on' ? true : false;
     var pending = req.body.pending === 'on' ? true : false;
+    var isbill = req.body.isbill === 'on' ? true : false;
     console.log('req.body.pending', req.body.pending);
     console.log('pending', pending);
 
@@ -291,8 +293,8 @@ app.post('/transactions', (req, res) => {
             amount: req.body.amount,
             date: req.body.date,
             category: req.body.category,
-            isbill: req.body.isbill,
-            notprocessed: notProcessed,
+            isbill: isbill,
+            notprocessed: notprocessed,
             id: req.body.id,
             pending: pending
         });
@@ -302,8 +304,8 @@ app.post('/transactions', (req, res) => {
             amount: req.body.amount,
             date: req.body.date,
             category: req.body.category,
-            isbill: req.body.isbill,
-            notprocessed: notProcessed,
+            isbill: isbill,
+            notprocessed: notprocessed,
             pending: pending,
             allowDuplicate: req.body.allowDuplicate || 0
         });
@@ -382,6 +384,15 @@ app.get('/transactions/notprocessed/:searchvalue', (req, res) => {
     });
 });
 
+app.get('/transactions/pending/:searchvalue', (req, res) => {
+    var searchValue = req.params.searchvalue;
+    var transactionPromise = getTransactionByPending(searchValue);
+    transactionPromise.then(result => {
+        //console.log(result);
+        res.send(result);
+    });
+});
+
 app.get('/transactions/category/:searchvalue', (req, res) => {
     var searchValue = req.params.searchvalue;
     var transactionPromise = getTransactionByCategory(searchValue);
@@ -442,6 +453,13 @@ var getTransactionByCategory = function(searchValue) {
 var getTransactionByNotProcessed = function(searchValue) {
     return transactionPromise = db(tableNames.transactions)
         .whereRaw('notprocessed = ?', searchValue)
+        .orderByRaw("date_part('year', transactiondate) desc, date_part('month', transactiondate) desc, date_part('day', transactiondate) desc")
+        .select(knex.raw("id, description, amount, category, isbill, pending, notprocessed, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"));
+};
+
+var getTransactionByPending = function(searchValue) {
+    return transactionPromise = db(tableNames.transactions)
+        .whereRaw('pending = ?', searchValue)
         .orderByRaw("date_part('year', transactiondate) desc, date_part('month', transactiondate) desc, date_part('day', transactiondate) desc")
         .select(knex.raw("id, description, amount, category, isbill, pending, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"));
 };

@@ -5,6 +5,7 @@ html(lang="en")
         link(rel='stylesheet', href='/css/bootstrap.min.css')
         link(rel='stylesheet', href='/css/bootstrap-theme.min.css')
         link(rel='stylesheet', href='/css/styles.css')
+        link(rel='stylesheet', href='/css/jquery-ui.min.css')
     body
         ul.nav.nav-pills
             li: a(href='/transactions/view') View
@@ -33,21 +34,29 @@ html(lang="en")
                                     input#transactionAmount.form-control(type='text', name='amount', value=`${transaction ? transaction.amount : ''}`)
                                 .form-group
                                     label Date
-                                    input#transactionDate.form-control(type='text', name='date', value=`${transaction ? transaction.transactiondate : ''}`)
+                                    input#transactionDate.form-control(name='date', value=`${transaction ? transaction.transactiondate : ''}`)
                                 .form-group
                                     label Category
                                     input#transactionCategory.form-control(type='text', name='category', value=`${transaction ? transaction.category : ''}`)
-                                .form-group
-                                    label Recurring Bill?
-                                    input#transactionIsBill.form-control(type='text', name='isbill', value=`${transaction ? transaction.isbill : ''}`)
                                 .checkbox
-                                    input.no-left-margin(type="checkbox", name='notprocessed', checked=transaction && transaction.notprocessed)
-                                    label Not Processed?
+                                    label(for='isbill') Recurring Bill?
+                                    input#isbill(type='checkbox', name='isbill', checked=transaction && transaction.isbill)
                                 .checkbox
-                                    input.no-left-margin(type="checkbox", name='pending', checked=transaction && transaction.pending)
-                                    label Pending?
+                                    label(for='notprocessed') Not Processed?
+                                    input#notprocessed(type="checkbox", name='notprocessed', checked=transaction && transaction.notprocessed)
+                                .checkbox
+                                    label(for='pending') Pending?
+                                    input#pending(type="checkbox", name='pending', checked=transaction && transaction.pending)
                                 input(type='hidden', name='page', value=`${page}`)
                                 button(type='submit', class='btn btn-lg btn-success') Submit
         script(src='/js/jquery.min.js')
+        script(src='/js/jquery-ui.min.js')
         script(src='/js/bootstrap.min.js')
         script(src='/js/findTransaction.js')
+        script(type='text/javascript').
+            $(function() {
+                $('#transactionDate').datepicker();
+                $('#isbill').checkboxradio({ icon: false });
+                $('#notprocessed').checkboxradio({ icon: false });
+                $('#pending').checkboxradio({ icon: false });
+            });
