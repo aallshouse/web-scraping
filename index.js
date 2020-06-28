@@ -203,6 +203,16 @@ app.use(
     express.static('js/notProcessed.js')
 );
 
+app.use(
+    '/js/jquery-ui.min.js',
+    express.static('js/jquery-ui.min.js')
+);
+
+app.use(
+    '/css/jquery-ui.min.css',
+    express.static('css/jquery-ui.min.css')
+);
+
 app.get('/', (req, res, next) => {
     var html = jade.renderFile('./templates/index.jade', {
         pageTitle: 'Jade Test Page'
