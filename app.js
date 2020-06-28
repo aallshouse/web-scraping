@@ -36,7 +36,7 @@ var transactionTable = 'transactions';
 // });
 
 let x = 0;
-fs.createReadStream('export-14.csv')
+fs.createReadStream('export-11.csv')
     .pipe(csv())
     .on('data', function (data) {
         var description = data.Description === 'Check'
