@@ -10,7 +10,7 @@
     margin-left: 0 !important;
 }
 
-.glyphicon {
+.glyphicon, .margin-left-10 {
     margin-left: 10px;
 }
 

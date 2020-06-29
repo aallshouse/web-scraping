@@ -444,10 +444,16 @@ app.post('/credit', (req, res) => {
 });
 
 var getTransactionByCategory = function(searchValue) {
+    if(searchValue === 'all') {
+        return transactionPromise = db(tableNames.transactions)
+            .orderByRaw("category")
+            .distinct("category");
+    }
+
     return transactionPromise = db(tableNames.transactions)
-        .whereRaw('category = ?', searchValue)
-        .orderByRaw("date_part('year', transactiondate) desc, date_part('month', transactiondate) desc, date_part('day', transactiondate) desc")
-        .select(knex.raw("id, description, amount, category, isbill, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"));
+        .whereRaw('category ilike ?', `%${searchValue}%`)
+        .orderByRaw("category")
+        .distinct("category");
 };
 
 var getTransactionByNotProcessed = function(searchValue) {
