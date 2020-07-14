@@ -6,6 +6,7 @@ html(lang="en")
         link(rel='stylesheet', href='/css/bootstrap-theme.min.css')
         link(rel='stylesheet', href='/css/styles.css')
         link(rel='stylesheet', href='/css/jquery-ui.min.css')
+        link(rel='stylesheet', href='/css/autocomplete.min.css')
     body
         ul.nav.nav-pills
             li: a(href='/transactions/view') View
@@ -53,10 +54,39 @@ html(lang="en")
         script(src='/js/jquery-ui.min.js')
         script(src='/js/bootstrap.min.js')
         script(src='/js/findTransaction.js')
+        script(src='/js/autocomplete.min.js')
         script(type='text/javascript').
             $(function() {
                 $('#transactionDate').datepicker();
                 $('#isbill').checkboxradio({ icon: false });
                 $('#notprocessed').checkboxradio({ icon: false });
                 $('#pending').checkboxradio({ icon: false });
+
+                autocomplete({
+                  input: document.getElementById("transactionCategory"),
+                  fetch: function(text, update) {
+                    text = text.toLowerCase();
+                    $.get('/transactions/category/' + searchValue, function(response){
+                        //- $.each(response, function(index, value){
+                        //-     var descriptionCell = "<td><a href='/transactions/" + value.id + "'>" + value.description + "</a></td>";
+                        //-     var categoryCell = '<td>' + value.category + '</td>';
+                        //-     var amountCell = '<td>' + value.amount + '</td>';
+                        //-     var dateCell = '<td>' + value.transactiondate + '</td>';
+                        //-     var row = '<tr>' + descriptionCell + categoryCell + amountCell + dateCell + '</tr>';
+                        //-     $('#tableBody').append(row);
+                        //- });
+                        console.log('category response', response);
+                        var suggestions = response
+                            .map(n => {
+                                return { label: n.category, value: n.category }
+                            })
+                            .filter(n => n.label.toLowerCase().startsWith(text));
+                        console.log('autocomplete suggestions', suggestions);
+                        update(suggestions);
+                    });
+                  },
+                  onSelect: function(item) {
+                    input.value = item.label;
+                  }
+                })
             });

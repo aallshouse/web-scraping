@@ -14,7 +14,7 @@ html(lang="en")
                 h3: div.label.label-primary.col-md-4 Pending Bank Balance $#{balance.pending}
                 h3: div.label.label-primary.label.col-md-4.col-md-offset-2 Bank Balance $#{balance.bank}
         - var currentPage = parseInt(page);
-        - currentPage = currentPage === 0 ? 1 : currentPage;
+        - currentPage = !currentPage || currentPage === 0 ? 1 : currentPage;
         #success-alert.alert.alert-success.hidden
             button.close(data-dismiss="alert"): span &times;
             strong Success!!

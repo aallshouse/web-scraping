@@ -213,6 +213,21 @@ app.use(
     express.static('css/jquery-ui.min.css')
 );
 
+app.use(
+    '/css/jquery-ui.min.css',
+    express.static('css/jquery-ui.min.css')
+);
+
+app.use(
+    '/css/autocomplete.min.css',
+    express.static('css/autocomplete.min.css')
+);
+
+app.use(
+    '/js/autocomplete.min.js',
+    express.static('js/autocomplete.min.js')
+);
+
 app.get('/', (req, res, next) => {
     var html = jade.renderFile('./templates/index.jade', {
         pageTitle: 'Jade Test Page'
