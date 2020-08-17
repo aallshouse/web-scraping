@@ -1,0 +1,82 @@
+doctype html
+html(lang="en")
+    head
+        title= pageTitle
+        link(rel='stylesheet', href='/css/bootstrap.min.css')
+        link(rel='stylesheet', href='/css/bootstrap-theme.min.css')
+        link(rel='stylesheet', href='/css/styles.css')
+    body
+        <div class="pos-f-t">
+            <nav class="navbar navbar-dark bg-dark">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </nav>
+            <div class="collapse" id="navbarToggleExternalContent">
+                <div class="bg-dark p-4">
+                    <h5 id="logout" class="text-muted h4"><a href="/logout">Logout</a></h5>
+                </div>
+            </div>
+        </div>
+        .panel.panel-primary
+            .panel-heading
+                h4 Balance Info
+            .panel-body
+                h3: div.label.label-primary.col-md-4 Available Balance $#{balance.available}
+                h3: div.label.label-primary.col-md-4 Pending Bank Balance $#{balance.pending}
+                h3: div.label.label-primary.label.col-md-4.col-md-offset-2 Bank Balance $#{balance.bank}
+        - var currentPage = parseInt(page);
+        - currentPage = !currentPage || currentPage === 0 ? 1 : currentPage;
+        #success-alert.alert.alert-success.hidden
+            button.close(data-dismiss="alert"): span &times;
+            strong Success!!
+            span &nbsp;Transaction has been deleted.
+        - var nextPage = currentPage + 1;
+        - var prevPage = currentPage - 1;
+        - prevPage = prevPage < 0 ? 1 : prevPage;
+        ul.nav.nav-pills
+            li.active: a(href='#') View
+            li: a(href='/transactions/search') Search
+            li: a(href=`/transactions?page=${currentPage}`) Add/Edit
+            li: a(href='/credit') Credit Cards
+        .bg-info.col-md-12.margin-top-30
+            a.col-md-2(href=`/transactions/view?page=${prevPage}`) View Previous Page
+            a.col-md-2.col-md-offset-8.text-right(href=`/transactions/view?page=${nextPage}`) View Next Page
+        h3.col-md-6.clearfix Recent transactions
+        table.table.table-striped
+            thead
+                tr
+                    th.col-md-7 Description
+                    th.col-md-2 Category
+                    th.col-md-1 Amount
+                    th.col-md-1 Date
+                    th.col-md-1 &nbsp;
+            tbody
+                each trans in transactions
+                    tr
+                        td: a(href=`/transactions/${trans.id}?page=${currentPage}`)= trans.description
+                            if trans.notprocessed
+                                a.not-processed(href=`#`, data-id=`${trans.id}`): span.text-danger: span.glyphicon.glyphicon-exclamation-sign
+                            if trans.pending
+                                a.pending(href=`#`, data-id=`${trans.id}`): span.glyphicon-warning-color: span.glyphicon.glyphicon-warning-sign
+                        td= trans.category
+                        td= trans.amount
+                        td= trans.transactiondate
+                        td: button.btn.btn-danger.btn-sm(data-toggle="modal", data-target="#deleteConfirmation", data-id=`${trans.id}`) Delete
+        #deleteConfirmation.modal.fade
+            .modal-dialog
+                .modal-content
+                    .modal-header
+                        button.close(data-dismiss="modal"): span &times;
+                        h4.modal-title Delete Transaction
+                    .modal-body.
+                        Are you sure you want to delete this transaction?
+                        #[div.text-danger: strong This action CANNOT be UNDONE!!]
+                        #[input#transId(type='hidden')]
+                    .modal-footer
+                        button.btn.btn-default(data-dismiss="modal") Close
+                        button#deleteTransaction.btn.btn-danger Delete
+        script(src='/js/jquery.min.js')
+        script(src='/js/bootstrap.min.js')
+        script(src='/js/deleteTransaction.js')
+        script(src='/js/notProcessed.js')

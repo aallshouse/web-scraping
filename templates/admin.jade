@@ -1,0 +1,53 @@
+doctype html
+html(lang="en")
+    head
+        title= pageTitle
+        link(rel='stylesheet', href='/css/bootstrap.min.css')
+        link(rel='stylesheet', href='/css/bootstrap-theme.min.css')
+        link(rel='stylesheet', href='/css/styles.css')
+    body
+        .container
+            .row
+                .col-md-6.col-md-offset-3
+                    .panel.panel-primary
+                        .panel-heading
+                            h4 Create new user
+                        .panel-body
+                            form(action='/admin/user/create', method='POST')
+                                .form-group
+                                    label Name
+                                    input#userName.form-control(type='text', name='userName', value='')
+                                .form-group
+                                    label Email
+                                    input#userEmail.form-control(type='text', name='userEmail', value='')
+                                .form-group
+                                    label Password
+                                    input#userPassword.form-control(type='password', name='userPassword', value='')
+                                button(type='submit', class='btn btn-lg btn-success') Submit
+            .row
+                .col-md-6.col-md-offset-3
+                    .panel.panel-primary
+                        .panel-heading
+                            h4 Verify user
+                        .panel-body
+                            form
+                                .form-group
+                                    label Email
+                                    input#loginEmail.form-control(type='text', name='loginEmail', value='')
+                                .form-group
+                                    label Password
+                                    input#loginPassword.form-control(type='password', name='loginPassword', value='')
+                                button(type='submit', class='btn btn-lg btn-success', id='login') Submit
+            .row
+                .col-md-6.col-md-offset-3
+                    .panel.panel-primary
+                        .panel-heading
+                            h4 Test protected route
+                        .panel-body
+                            form
+                                .form-group
+                                    label Email
+                                    input#testEmail.form-control(type='text', name='testEmail', value='')
+                                button(type='submit', class='btn btn-lg btn-success', id='testSubmit') Submit
+        script(src='/js/jquery.min.js')
+        script(src='/js/admin.js')
