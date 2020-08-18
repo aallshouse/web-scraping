@@ -16,27 +16,15 @@ const tableNames = {
 
 //TODO: move below knex info into env file
 const knex = require('knex');
-//FOR Deployment
-// const db = knex({
-//     client: 'pg',
-//     connection: {
-//         host: process.env.PROD_DB_HOST,
-//         port: process.env.PROD_DB_PORT,
-//         user: process.env.PROD_DB_USER,
-//         password: process.env.PROD_DB_PASSWORD,
-//         database: process.env.PROD_DB_DATABASE,
-//         ssl: true
-//     }
-// });
-//FOR Local
 const db = knex({
     client: 'pg',
     connection: {
-        host: process.env.DEV_DB_HOST,
-        port: process.env.DEV_DB_PORT,
-        user: process.env.DEV_DB_USER,
-        password: process.env.DEV_DB_PASSWORD,
-        database: process.env.DEV_DB_DATABASE
+        host: process.env.PROD_DB_HOST,
+        port: process.env.PROD_DB_PORT,
+        user: process.env.PROD_DB_USER,
+        password: process.env.PROD_DB_PASSWORD,
+        database: process.env.PROD_DB_DATABASE,
+        ssl: true
     }
 });
 
@@ -182,16 +170,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use(
-    '/fonts',
-    express.static('bower_components/bootstrap/dist/fonts')
-);
-app.use(
     '/css/bootstrap.min.css',
-    express.static('bower_components/bootstrap/dist/css/bootstrap.min.css')
+    express.static('static/bootstrap.min.css')
 );
 app.use(
     '/css/bootstrap-theme.min.css',
-    express.static('bower_components/bootstrap/dist/css/bootstrap-theme.min.css')
+    express.static('static/bootstrap-theme.min.css')
 );
 app.use(
     '/css/styles.css',
@@ -199,11 +183,11 @@ app.use(
 );
 app.use(
     '/js/bootstrap.min.js',
-    express.static('bower_components/bootstrap/dist/js/bootstrap.min.js')
+    express.static('node_modules/bootstrap/dist/js/bootstrap.min.js')
 );
 app.use(
     '/js/jquery.min.js',
-    express.static('bower_components/jquery/dist/jquery.min.js')
+    express.static('node_modules/jquery/dist/jquery.min.js')
 );
 app.use(
     '/js/deleteTransaction.js',
@@ -273,13 +257,13 @@ app.use(
         userProperty: 'token',
         getToken: getTokenFromHeader,
         algorithms: ['HS256']
-    }).unless({path: ['/', '/admin/user/verify']})
+    }).unless({path: ['/', '/admin/user/verify', '/public/js/jquery.min.js']})
 );
 
 app.use(function (err, req, res, next) {
     console.log(err.name, err);
     if (err.name === 'UnauthorizedError') {
-        res.redirect('/');
+        //res.redirect('/');
         res.status(401).send('invalid token...');
     }
   });
