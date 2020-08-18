@@ -276,6 +276,14 @@ app.use(
     }).unless({path: ['/', '/admin/user/verify']})
 );
 
+app.use(function (err, req, res, next) {
+    console.log(err.name, err);
+    if (err.name === 'UnauthorizedError') {
+        res.redirect('/');
+        res.status(401).send('invalid token...');
+    }
+  });
+
 app.get('/', (req, res, next) => {
     var html = jade.renderFile('./templates/login.jade', {
         pageTitle: 'Login'
