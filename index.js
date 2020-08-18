@@ -253,8 +253,8 @@ app.use(
 );
 
 app.use(
-    '/js/ajaxRequests.js',
-    express.static('js/ajaxRequests.js')
+    '/js/login.js',
+    express.static('js/login.js')
 );
 
 const getTokenFromHeader = (req) => {
@@ -273,12 +273,12 @@ app.use(
         userProperty: 'token',
         getToken: getTokenFromHeader,
         algorithms: ['HS256']
-    }).unless({path: ['/admin', '/admin/user/verify']})
+    }).unless({path: ['/', '/admin/user/verify']})
 );
 
 app.get('/', (req, res, next) => {
-    var html = jade.renderFile('./templates/index.jade', {
-        pageTitle: 'Jade Test Page'
+    var html = jade.renderFile('./templates/login.jade', {
+        pageTitle: 'Login'
     });
     res.send(html);
 });
