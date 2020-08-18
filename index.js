@@ -257,7 +257,7 @@ app.use(
         userProperty: 'token',
         getToken: getTokenFromHeader,
         algorithms: ['HS256']
-    }).unless({path: ['/', '/admin/user/verify', '/public/js/jquery.min.js']})
+    }).unless({path: ['/', '/admin/user/verify']})
 );
 
 app.use(function (err, req, res, next) {
