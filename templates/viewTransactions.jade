@@ -22,9 +22,12 @@ html(lang="en")
             .panel-heading
                 h4 Balance Info
             .panel-body
-                h3: div.label.label-primary.col-md-4 Available Balance $#{balance.available}
-                h3: div.label.label-primary.col-md-4 Pending Bank Balance $#{balance.pending}
-                h3: div.label.label-primary.label.col-md-4.col-md-offset-2 Bank Balance $#{balance.bank}
+                div.balance
+                    h3: div.label.label-primary Available Balance $#{balance.available}
+                div.balance
+                    h3: div.label.label-primary Pending Bank Balance $#{balance.pending}
+                div.balance
+                    h3: div.label.label-primary Bank Balance $#{balance.bank}
         - var currentPage = parseInt(page);
         - currentPage = !currentPage || currentPage === 0 ? 1 : currentPage;
         #success-alert.alert.alert-success.hidden

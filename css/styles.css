@@ -90,3 +90,16 @@
     border: 1px solid transparent;
     border-radius: .25rem;
 }
+
+.balance {
+    padding: 5px;
+    width: 500px;
+}
+
+.balance h3 {
+    margin: 0;
+}
+
+.balance .label {
+    display: block;
+}
