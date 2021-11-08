@@ -45,6 +45,8 @@ html(lang="en")
         .bg-info.col-md-12.margin-top-30
             a.col-md-2(href=`/transactions/view?page=${prevPage}`) View Previous Page
             a.col-md-2.col-md-offset-8.text-right(href=`/transactions/view?page=${nextPage}`) View Next Page
+            span.col-md-1.col-md-offset-10.text-right &nbsp;|
+            a.col-md-2.col-md-offset-11.text-right(href=`/transactions/view?page=${currentPage}`) Refresh Page
         h3.col-md-6.clearfix Recent transactions
         table.table.table-striped
             thead
@@ -62,6 +64,8 @@ html(lang="en")
                                 a.not-processed(href=`#`, data-id=`${trans.id}`): span.text-danger: span.glyphicon.glyphicon-exclamation-sign
                             if trans.pending
                                 a.pending(href=`#`, data-id=`${trans.id}`): span.glyphicon-warning-color: span.glyphicon.glyphicon-warning-sign
+                            if trans.isbill
+                                span.glyphicon-bill: span.glyphicon.glyphicon-envelope
                         td= trans.category
                         td= trans.amount
                         td= trans.transactiondate

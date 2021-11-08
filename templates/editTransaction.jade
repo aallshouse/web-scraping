@@ -32,13 +32,13 @@ html(lang="en")
                                     input#transactionDescription.form-control(type='text', name='description', value=`${transaction ? transaction.description : ''}`)
                                 .form-group
                                     label Amount
-                                    input#transactionAmount.form-control(type='text', name='amount', value=`${transaction ? transaction.amount : ''}`)
+                                    input#transactionAmount.form-control(type='text', required, name='amount', value=`${transaction ? transaction.amount : ''}`)
                                 .form-group
                                     label Date
-                                    input#transactionDate.form-control(name='date', value=`${transaction ? transaction.transactiondate : ''}`)
+                                    input#transactionDate.form-control(name='date', required, autocomplete="off", value=`${transaction ? transaction.transactiondate : ''}`)
                                 .form-group
                                     label Category
-                                    input#transactionCategory.form-control(type='text', name='category', value=`${transaction ? transaction.category : ''}`)
+                                    input#transactionCategory.form-control(type='text', required, autocomplete="off", name='category', value=`${transaction ? transaction.category : ''}`)
                                 .checkbox
                                     label(for='isbill') Recurring Bill?
                                     input#isbill(type='checkbox', name='isbill', checked=transaction && transaction.isbill)
@@ -66,7 +66,7 @@ html(lang="en")
                   input: document.getElementById("transactionCategory"),
                   fetch: function(text, update) {
                     text = text.toLowerCase();
-                    $.get('/transactions/category/' + searchValue, function(response){
+                    $.get('/transactions/category/' + text, function(response){
                         //- $.each(response, function(index, value){
                         //-     var descriptionCell = "<td><a href='/transactions/" + value.id + "'>" + value.description + "</a></td>";
                         //-     var categoryCell = '<td>' + value.category + '</td>';
@@ -79,14 +79,14 @@ html(lang="en")
                         var suggestions = response
                             .map(n => {
                                 return { label: n.category, value: n.category }
-                            })
-                            .filter(n => n.label.toLowerCase().startsWith(text));
+                            });
                         console.log('autocomplete suggestions', suggestions);
                         update(suggestions);
                     });
                   },
                   onSelect: function(item) {
-                    input.value = item.label;
+                    //debugger;
+                    this.input.value = item.label;
                   }
                 })
             });

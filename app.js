@@ -49,7 +49,7 @@ var transactionTable = 'transactions';
 // });
 
 let x = 0;
-fs.createReadStream('export-11.csv')
+fs.createReadStream('./data-files/export-18.csv')
     .pipe(csv())
     .on('data', function (data) {
         var description = data.Description === 'Check'
@@ -60,7 +60,7 @@ fs.createReadStream('export-11.csv')
             description: description,
             amount: amount,
             transactiondate: data.Date
-        }).select().first().then(t => {
+        }).select('id', 'description', 'amount', 'transactiondate').first().then(t => {
             if(!t) {
                 db(transactionTable).insert([
                     {

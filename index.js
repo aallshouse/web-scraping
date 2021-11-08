@@ -64,6 +64,41 @@ var dataIsValid = function(data) {
     return true;
 };
 
+var getTransactionsByDateRange = function(data) {
+    console.log('executing getTransactions()');
+
+    var startDate = data.startDate;
+    var endDate = data.endDate;
+    return transactionPromise = db(tableNames.transactions)
+        .orderByRaw("date_part('year', transactiondate) desc, date_part('month', transactiondate) desc, date_part('day', transactiondate) desc, description")
+        .select(knex.raw("id, description, amount, category, notprocessed, pending, isbill, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
+        .whereBetween('transactiondate', [startDate, endDate]);
+};
+
+var getBillsByDateRange = function(data) {
+    console.log('executing getBillsByDateRange()');
+
+    var startDate = data.startDate;
+    var endDate = data.endDate;
+    return transactionPromise = db(tableNames.transactions)
+        .orderByRaw("date_part('year', transactiondate) desc, date_part('month', transactiondate) desc, date_part('day', transactiondate) desc, description")
+        .select(knex.raw("id, description, amount, category, notprocessed, pending, isbill, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
+        .whereBetween('transactiondate', [startDate, endDate]).where('isbill', 1);
+};
+
+var getCategoryTotals = function(data) {
+    console.log('executing getCategoryTotals()');
+
+    var startDate = data.startDate;
+    var endDate = data.endDate;
+
+    return transactionPromise = db(tableNames.transactions)
+        .orderByRaw("category")
+        .groupBy('category')
+        .select(knex.raw("category, sum(to_number(amount, 'S9999999.99')) as amount"))
+        .whereBetween('transactiondate', [startDate, endDate]);
+};
+
 var getTransactions = function(data) {
     console.log('executing getTransactions()');
 
@@ -72,42 +107,53 @@ var getTransactions = function(data) {
         page = page - 1;
     }
 
-    var count = data.count || 20;
+    var count = data.count || 100;
     return transactionPromise = db(tableNames.transactions)
         .orderByRaw("date_part('year', transactiondate) desc, date_part('month', transactiondate) desc, date_part('day', transactiondate) desc, description")
-        .select(knex.raw("id, description, amount, category, notprocessed, pending, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
+        .select(knex.raw("id, description, amount, category, notprocessed, pending, isbill, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
         .limit(count).offset(page*count);
 };
 
 var insertTransaction = function(data) {
-    if(!dataIsValid(data)) {
-        console.log('error reading data for insert');
-        return;
-    }
-
-    db(tableNames.transactions).where({
-        description: data.description,
-        amount: data.amount,
-        transactiondate: data.date,
-        category: data.category,
-        isbill: data.isbill
-    }).select().first().then(t => {
-        if(!t || data.allowDuplicate === 1) {
-            db(tableNames.transactions).insert([
-                {
-                    description: data.description,
-                    amount: data.amount,
-                    transactiondate: data.date,
-                    category: data.category,
-                    isbill: data.isbill,
-                    notprocessed: data.notprocessed,
-                    pending: data.pending
-                }
-            ]).then(result => {
-                console.log('transaction inserted');
-            });
+    var insertPromise = new Promise((resolve, reject) => {
+        if(!dataIsValid(data)) {
+            console.log('error reading data for insert');
+            return resolve(false);
         }
+
+        db(tableNames.transactions).where({
+            description: data.description,
+            amount: data.amount,
+            transactiondate: data.date,
+            category: data.category,
+            isbill: data.isbill
+        }).select().first().then(t => {
+            console.log('db result returned | allowDuplicate', data.allowDuplicate);
+            if(!t || data.allowDuplicate === 1) {
+                db(tableNames.transactions).insert([
+                    {
+                        description: data.description,
+                        amount: data.amount,
+                        transactiondate: data.date,
+                        category: data.category,
+                        isbill: data.isbill,
+                        notprocessed: data.notprocessed,
+                        pending: data.pending
+                    }
+                ]).then(result => {
+                    console.log('transaction inserted');
+                    return resolve(true);
+                }).catch(err => {
+                    console.log(err);
+                    return resolve(false);
+                });
+            } else {
+                return resolve(false);
+            }
+        });
     });
+
+    return insertPromise;
 };
 
 var updateTransaction = function(data) {
@@ -131,6 +177,22 @@ var updateTransaction = function(data) {
             pending: data.pending
         }).then(result => {
             console.log('transaction updated');
+        });
+};
+
+var updateIsBill = function(id) {
+    if(!id) {
+        console.log('error reading id for update');
+        return;
+    }
+
+    db(tableNames.transactions).where({ id: id })
+        .update({
+            isbill: 't'
+        })
+        .then(result => {
+            console.log('transaction updated');
+            //TODO: refresh bank balance
         });
 };
 
@@ -177,6 +239,13 @@ var deleteTransaction = function(id) {
             console.log('transaction deleted');
         });
 };
+
+//CORS
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "http://localhost:4200");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -273,7 +342,16 @@ app.use(
         userProperty: 'token',
         getToken: getTokenFromHeader,
         algorithms: ['HS256']
-    }).unless({path: ['/', '/admin/user/verify']})
+    }).unless({path: [
+        '/',
+        '/admin/user/verify',
+        '/api/transactions/bills/daterange',
+        '/api/transactions/daterange',
+        '/api/transactions',
+        '/api/balances',
+        '/api/categories/daterange',
+        '/api/setAsBill'
+    ]})
 );
 
 app.use(function (err, req, res, next) {
@@ -297,6 +375,21 @@ app.get('/articles', (req, res) => {
 
 app.post('/articles', (req, res) => {
     res.send('OK');
+});
+
+app.get('/api/balances', (req, res) => {
+    var bankBalancePromise = getBankBalance();
+    var availableBalancePromise = getAvailableBalance();
+    var pendingBankBalance = getPendingBalance();
+
+    Promise.all([bankBalancePromise, availableBalancePromise, pendingBankBalance])
+        .then(result => {
+            res.send({
+                bank: result[0][0].sum,
+                available: result[1][0].sum,
+                pending: result[2][0].sum
+            });
+        });
 });
 
 app.get('/transactions/view', (req, res) => {
@@ -425,6 +518,38 @@ app.get('/transactions', (req, res) => {
     res.send(html);
 });
 
+app.post('/api/transactions', (req, res) => {
+    //TODO: check out other insertTransaction calls to make sure new promise won't interfere
+    //it shouldnt though because I wasn't expecting a return before
+    const responsePromise = insertTransaction({
+        description: req.body.description,
+        amount: req.body.amount,
+        date: req.body.date,
+        category: req.body.category,
+        isbill: req.body.isbill,
+        notprocessed: req.body.notprocessed,
+        pending: req.body.pending,
+        allowDuplicate: req.body.allowDuplicate || 0
+    });
+    responsePromise.then(result => {
+        console.log('/api/transactions response', result);
+        if(result) {
+            res.setHeader('cache', 'no-cache');
+            res.status(200).send({message: 'OK', ok: true});
+        } else {
+            res.setHeader('cache', 'no-cache');
+            res.status(500).send({message: 'Could not save transaction', ok: false});
+        }
+    });
+});
+
+app.post('/api/setAsBill', (req, res) => {
+    console.log(`transactionId: ${req.body.transactionId}`);
+
+    //TODO: update the db with the column id passed and set isbill
+    updateIsBill(req.body.transactionId);
+});
+
 app.post('/transactions', (req, res) => {
     //console.log('NotProcessed: ' + req.body.notprocessed);
     // console.log('req.body', req.body);
@@ -456,6 +581,8 @@ app.post('/transactions', (req, res) => {
             pending: pending,
             allowDuplicate: req.body.allowDuplicate || 0
         });
+        //TODO: insertTransaction now returns a promise
+        //if rejected, do not redirect page
     }
 
     //res.send('OK');
@@ -549,6 +676,58 @@ app.get('/transactions/category/:searchvalue', (req, res) => {
     });
 });
 
+app.get('/api/transactions/daterange', (req, res) => {
+    //todo: get transaction between two dates
+    // var startDate = Date.parse(req.query.startDate);
+    // var endDate = Date.parse(req.query.endDate);
+    // console.log('startDate', startDate.toString());
+    // console.log('endDate', endDate.toString());
+
+    var startDate = req.query.startDate;
+    var endDate = req.query.endDate;
+
+    var transactionPromise = getTransactionsByDateRange({
+        startDate: startDate,
+        endDate: endDate
+    }).then(result => {
+        res.send(result);
+    });
+
+    // res.send('Ok');
+});
+
+app.get('/api/transactions/bills/daterange', (req, res) => {
+    //todo: get transaction between two dates
+    // var startDate = Date.parse(req.query.startDate);
+    // var endDate = Date.parse(req.query.endDate);
+    // console.log('startDate', startDate.toString());
+    // console.log('endDate', endDate.toString());
+
+    var startDate = req.query.startDate;
+    var endDate = req.query.endDate;
+
+    var transactionPromise = getBillsByDateRange({
+        startDate: startDate,
+        endDate: endDate
+    }).then(result => {
+        res.send(result);
+    });
+
+    // res.send('Ok');
+});
+
+app.get('/api/categories/daterange', (req, res) => {
+    var startDate = req.query.startDate;
+    var endDate = req.query.endDate;
+
+    var transactionPromise = getCategoryTotals({
+        startDate: startDate,
+        endDate: endDate
+    }).then(result => {
+        res.send(result);
+    });
+});
+
 app.get('/credit/find/:id', (req, res) => {
     var creditCardStatusId = req.params.id;
     var creditCardPromise = db(tableNames.creditCards)
@@ -638,6 +817,6 @@ app.put('/transactions/:id', (req, res) => {
     res.send('OK');
 });
 
-app.listen(3000);
+app.listen(3001);
 
 module.exports = app;
