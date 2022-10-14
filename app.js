@@ -49,7 +49,7 @@ var transactionTable = 'transactions';
 // });
 
 let x = 0;
-fs.createReadStream('./data-files/export-18.csv')
+fs.createReadStream('./data-files/export-45.csv')
     .pipe(csv())
     .on('data', function (data) {
         var description = data.Description === 'Check'

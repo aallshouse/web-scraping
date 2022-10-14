@@ -548,6 +548,9 @@ app.post('/api/setAsBill', (req, res) => {
 
     //TODO: update the db with the column id passed and set isbill
     updateIsBill(req.body.transactionId);
+
+    res.setHeader('cache', 'no-cache');
+    res.status(200).send({message: 'OK', ok: true});
 });
 
 app.post('/transactions', (req, res) => {

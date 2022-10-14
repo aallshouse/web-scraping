@@ -1,0 +1,12 @@
+
+Add autocomplete filter to quickly find records in the transactions list
+
+Create upload script to copy transactions to an online db, such as firebase
+
+readonly app or mobile site can read from here to show transactions and balances
+
+Add notes to transactions and posting order so I can view the transactions in the order the bank has them in
+
+Add general notes entry to state when signing up for new subscriptions, monthly or yearly.  When canceling a subscription or signing up for a trial and when it expires.
+
+
