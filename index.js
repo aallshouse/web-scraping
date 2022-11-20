@@ -9,6 +9,76 @@ var bodyParser = require('body-parser');
 var jwtExpress = require('express-jwt');
 var cookieParser = require('cookie-parser');
 
+const { Sequelize, DataTypes, Op } = require('sequelize');
+//'postgres://user:pass@host:port/dbname'
+const sequelize = new Sequelize(
+    `postgres://${process.env.DEV_DB_USER}:${process.env.DEV_DB_PASSWORD}@${process.env.DEV_DB_HOST}:${process.env.DEV_DB_PORT}/${process.env.DEV_DB_DATABASE}`);
+try {
+    //TODO: await can only be used within an async function
+    //how to call from the main area here?
+    sequelize.authenticate().then(() => {
+        console.log('Connection has been established successfully.');
+    });
+
+    const Transaction = sequelize.define('Transaction', {
+        id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            primaryKey: true
+        },
+        description: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        amount: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        transactiondate: {
+            type: DataTypes.DATE,
+            allowNull: false
+        },
+        notprocessed: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false
+        },
+        isbill: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false
+        },
+        pending: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false
+        },
+        category: {
+            type: DataTypes.STRING,
+            allowNull: false
+        }
+    }, {
+        tableName: 'transactions',
+        timestamps: false
+    });
+
+    var transactions = Transaction.findAll({
+        where: {
+            transactiondate: {
+                [Op.between]: [new Date(new Date() - 14 * 24 * 60 * 60 * 1000), new Date()]
+            }
+        },
+        order: [
+            ['transactiondate', 'DESC']
+        ],
+        limit: 10
+    }).then(data => {
+        console.log('transactions', data);
+    }).catch(error => {
+        console.log('query error', error);
+    });
+
+} catch (error) {
+    console.error('Unable to connect to the database:', error);
+}
+
 const tableNames = {
     transactions: 'transactions',
     creditCards: 'creditcards'

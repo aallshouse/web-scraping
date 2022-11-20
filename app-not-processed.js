@@ -49,7 +49,7 @@ var transactionTable = 'transactions';
 // });
 
 let x = 0;
-fs.createReadStream('./data-files/export-52.csv')
+fs.createReadStream('./data-files/export-48-notprocessed.csv')
     .pipe(csv())
     .on('data', function (data) {
         var description = data.Description === 'Check'
@@ -67,7 +67,7 @@ fs.createReadStream('./data-files/export-52.csv')
                         description: description,
                         amount: amount,
                         transactiondate: data.Date,
-                        notprocessed: false
+                        notprocessed: true
                     }
                 ]).then(result => {
                     x++;
