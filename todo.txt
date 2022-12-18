@@ -9,4 +9,7 @@ Add notes to transactions and posting order so I can view the transactions in th
 
 Add general notes entry to state when signing up for new subscriptions, monthly or yearly.  When canceling a subscription or signing up for a trial and when it expires.
 
+***
+Show sum of transactions within date range and (category or description)
+
 
