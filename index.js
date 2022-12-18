@@ -20,6 +20,11 @@ try {
         console.log('Connection has been established successfully.');
     });
 
+} catch (error) {
+    console.error('Unable to connect to the database:', error);
+}
+
+const getTransactionsFromSequelize = () => {
     const Transaction = sequelize.define('Transaction', {
         id: {
             type: DataTypes.INTEGER,
@@ -59,7 +64,7 @@ try {
         timestamps: false
     });
 
-    var transactions = Transaction.findAll({
+    return Transaction.findAll({
         where: {
             transactiondate: {
                 [Op.between]: [new Date(new Date() - 14 * 24 * 60 * 60 * 1000), new Date()]
@@ -69,15 +74,8 @@ try {
             ['transactiondate', 'DESC']
         ],
         limit: 10
-    }).then(data => {
-        console.log('transactions', data);
-    }).catch(error => {
-        console.log('query error', error);
     });
-
-} catch (error) {
-    console.error('Unable to connect to the database:', error);
-}
+};
 
 const tableNames = {
     transactions: 'transactions',
@@ -394,6 +392,16 @@ app.use(
 app.use(
     '/js/login.js',
     express.static('js/login.js')
+);
+
+app.use(
+    '/css/test-page.css',
+    express.static('css/test-page.css')
+);
+
+app.use(
+    '/js/test.js',
+    express.static('js/test.js')
 );
 
 const getTokenFromHeader = (req) => {
@@ -888,6 +896,24 @@ app.put('/transactions/:id', (req, res) => {
     console.log('QueryString: ' + JSON.stringify(req.query));
     console.log('Body: ' + JSON.stringify(req.body));
     res.send('OK');
+});
+
+app.get('/testpage', (req, res, next) => {
+    var html = jade.renderFile('./templates/test.jade', {
+        pageTitle: 'Testing Page'
+    });
+
+    res.send(html);
+});
+
+app.get('/testsequelize', (req, res, next) => {
+    getTransactionsFromSequelize().then(data => {
+        //console.log('transactions', data);
+        res.json(data).status(200);
+    }).catch(error => {
+        console.log('query error', error);
+        res.status(500);
+    });
 });
 
 app.listen(3001);
