@@ -18,7 +18,7 @@
     "pg": "^6.4.0",
     "pug": "^2.0.4",
     "argon2": "^0.27.0",
-    "jsonwebtoken": "8.5.1",
+    "jsonwebtoken": "9.0.0",
     "express-jwt": "6.0.0",
     "cookie-parser": "1.4.5",
     "dotenv": "8.2.0"
