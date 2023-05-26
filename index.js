@@ -9,6 +9,8 @@ var bodyParser = require('body-parser');
 var jwtExpress = require('express-jwt');
 var cookieParser = require('cookie-parser');
 
+const transactionsTableName = 'transactions2';
+
 const { Sequelize, DataTypes, Op } = require('sequelize');
 //'postgres://user:pass@host:port/dbname'
 const sequelize = new Sequelize(
@@ -60,7 +62,7 @@ const getTransactionsFromSequelize = () => {
             allowNull: false
         }
     }, {
-        tableName: 'transactions',
+        tableName: transactionsTableName,
         timestamps: false
     });
 
@@ -78,7 +80,7 @@ const getTransactionsFromSequelize = () => {
 };
 
 const tableNames = {
-    transactions: 'transactions',
+    transactions: transactionsTableName,
     creditCards: 'creditcards'
 };
 

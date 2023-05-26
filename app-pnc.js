@@ -26,7 +26,7 @@ const db = knex({
     }
 });
 
-var transactionTable = 'transactions';
+var transactionTable = 'transactions2';
 
 //probably need a .then() call after below to get it to execute the promise
 // db.schema.createTableIfNotExists(transactionTable, table => {
@@ -49,12 +49,20 @@ var transactionTable = 'transactions';
 // });
 
 let x = 0;
-fs.createReadStream('./data-files/export-63.csv')
+fs.createReadStream('./data-files/accountActivityExport-5.csv')
     .pipe(csv())
     .on('data', function (data) {
-        var description = data.Description === 'Check'
-            ? data.Description + ' ' + data.No : data.Description;
-        var amount = data.Debit === '' ? data.Credit : data.Debit;
+        // console.log(data);
+        var description = data.Description;
+
+        // TODO: remove $ from amount and make negative if its a withdrawal
+        var amount = data.Withdrawals === '' ? data.Deposits : data.Withdrawals;
+        //remove $ from amount
+        amount = amount.replace('$', '');
+        //make negative if its a withdrawal
+        if(data.Withdrawals !== '') {
+            amount = '-' + amount;
+        }
 
         db(transactionTable).where({
             description: description,
