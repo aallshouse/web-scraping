@@ -49,7 +49,7 @@ var transactionTable = 'transactions2';
 // });
 
 let x = 0;
-fs.createReadStream('./data-files/accountActivityExport-5.csv')
+fs.createReadStream('./data-files/pnc/accountActivityExport-15.csv')
     .pipe(csv())
     .on('data', function (data) {
         // console.log(data);
