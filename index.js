@@ -79,6 +79,13 @@ const getTransactionsFromSequelize = () => {
     });
 };
 
+//***
+// import services
+const transactionsService = require('./services/transactions.service');
+const transactionEndpoints = require('./endpoints/transaction.endpoints');
+
+//***
+
 const tableNames = {
     transactions: transactionsTableName,
     creditCards: 'creditcards'
@@ -134,16 +141,7 @@ var dataIsValid = function(data) {
     return true;
 };
 
-var getTransactionsByDateRange = function(data) {
-    console.log('executing getTransactions()');
 
-    var startDate = data.startDate;
-    var endDate = data.endDate;
-    return transactionPromise = db(tableNames.transactions)
-        .orderByRaw("date_part('year', transactiondate) desc, date_part('month', transactiondate) desc, date_part('day', transactiondate) desc, description")
-        .select(knex.raw("id, description, amount, category, notprocessed, pending, isbill, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
-        .whereBetween('transactiondate', [startDate, endDate]);
-};
 
 var getBillsByDateRange = function(data) {
     console.log('executing getBillsByDateRange()');
@@ -169,20 +167,7 @@ var getCategoryTotals = function(data) {
         .whereBetween('transactiondate', [startDate, endDate]);
 };
 
-var getTransactions = function(data) {
-    console.log('executing getTransactions()');
 
-    var page = data.page;
-    if(page > 0) {
-        page = page - 1;
-    }
-
-    var count = data.count || 100;
-    return transactionPromise = db(tableNames.transactions)
-        .orderByRaw("date_part('year', transactiondate) desc, date_part('month', transactiondate) desc, date_part('day', transactiondate) desc, description")
-        .select(knex.raw("id, description, amount, category, notprocessed, pending, isbill, to_char(transactiondate, 'MM/DD/YYYY') as transactiondate"))
-        .limit(count).offset(page*count);
-};
 
 var insertTransaction = function(data) {
     var insertPromise = new Promise((resolve, reject) => {
@@ -458,9 +443,9 @@ app.post('/articles', (req, res) => {
 });
 
 app.get('/api/balances', (req, res) => {
-    var bankBalancePromise = getBankBalance();
-    var availableBalancePromise = getAvailableBalance();
-    var pendingBankBalance = getPendingBalance();
+    const bankBalancePromise = transactionsService.getBankBalance(db, tableNames);
+    const availableBalancePromise = transactionsService.getAvailableBalance(db, tableNames);
+    const pendingBankBalance = transactionsService.getPendingBalance(db, tableNames);
 
     Promise.all([bankBalancePromise, availableBalancePromise, pendingBankBalance])
         .then(result => {
@@ -472,48 +457,7 @@ app.get('/api/balances', (req, res) => {
         });
 });
 
-app.get('/transactions/view', (req, res) => {
-    var page  = req.query.page || 0;
-    var transactionPromise = getTransactions({
-        count: req.query.count,
-        page: page
-    });
-
-    var bankBalancePromise = getBankBalance();
-    var availableBalancePromise = getAvailableBalance();
-    var pendingBankBalance = getPendingBalance();
-
-    //resolve promises and return data with html
-    Promise.all([transactionPromise, bankBalancePromise, availableBalancePromise, pendingBankBalance])
-        .then(result => {
-            var html = jade.renderFile('./templates/viewTransactions.jade', {
-                pageTitle: 'View Transactions',
-                transactions: result[0],
-                page: page,
-                balance: {
-                    bank: result[1][0].sum,
-                    available: result[2][0].sum,
-                    pending: result[3][0].sum
-                }
-            });
-            res.send(html);
-    });
-});
-
-var getBankBalance = function() {
-    return db(tableNames.transactions).where({ notprocessed: 'f', pending: 'f' })
-        .select(knex.raw("sum(to_number(amount, 'S9999999.99'))"));
-};
-
-var getAvailableBalance = function() {
-    return db(tableNames.transactions)
-        .select(knex.raw("sum(to_number(amount, 'S9999999.99'))"));
-};
-
-var getPendingBalance = function() {
-    return db(tableNames.transactions).where({ pending: 't' }).orWhere({ notprocessed: 'f', pending: 'f' })
-        .select(knex.raw("sum(to_number(amount, 'S9999999.99'))"));
-};
+transactionEndpoints.mapEndpoints(app, db, tableNames);
 
 app.get('/admin', (req, res) => {
     var html = jade.renderFile('./templates/admin.jade', {
@@ -769,10 +713,10 @@ app.get('/api/transactions/daterange', (req, res) => {
     var startDate = req.query.startDate;
     var endDate = req.query.endDate;
 
-    var transactionPromise = getTransactionsByDateRange({
+    const transactionPromise = transactionsService.getTransactionsByDateRange({
         startDate: startDate,
         endDate: endDate
-    }).then(result => {
+    }, db, tableNames).then(result => {
         res.send(result);
     });
 
